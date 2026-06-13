@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert, X, Atom } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MoleculeViewer } from '@/components/molecule-viewer';
 import type { Ingredient } from '@/lib/mock-data';
 
 interface IngredientDetailProps {
@@ -88,13 +89,18 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
               <p className="text-sm text-muted leading-relaxed">{ingredient.description}</p>
             </div>
 
-            {/* Chemical Structure Placeholder */}
+            {/* Chemical Structure */}
             <div>
-              <h4 className="text-sm font-semibold text-white mb-2">化学结构</h4>
-              <div className="aspect-[2/1] bg-surface-hover rounded-lg border border-border flex items-center justify-center gap-2">
-                <Atom className="w-5 h-5 text-muted" />
-                <span className="text-sm text-muted">化学结构图加载中...</span>
-              </div>
+              <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                <Atom className="w-4 h-4 text-accent" />
+                化学结构
+              </h4>
+              <MoleculeViewer smiles={ingredient.smiles} name={ingredient.nameCn} />
+              {ingredient.smiles && (
+                <p className="mt-2 font-mono text-[11px] text-muted-dark break-all leading-relaxed">
+                  SMILES: {ingredient.smiles}
+                </p>
+              )}
             </div>
           </div>
         </motion.div>

@@ -10,3 +10,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+
+# Claude Code local machine config (keep launch.json shared)
+.claude/settings.local.json
