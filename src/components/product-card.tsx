@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Star, Droplets } from 'lucide-react';
 import type { Product } from '@/lib/mock-data';
+import { getBrandById } from '@/lib/mock-data';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +11,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const brand = getBrandById(product.brandId);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -22,6 +25,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
           <Droplets className="w-10 h-10 text-muted/30" />
         </div>
+        <div className="absolute top-2 left-2">
+          <span className="badge bg-surface-hover/80 text-white/90 border border-white/10 backdrop-blur-sm text-[10px]">
+            {brand?.nameCn || product.brandId}
+          </span>
+        </div>
         <div className="absolute top-2 right-2">
           <span className="badge bg-white/10 text-white border border-white/10 backdrop-blur-sm">
             {product.category}
@@ -33,9 +41,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       <div className="flex items-start justify-between mb-2">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-white truncate group-hover:text-primary transition-colors">
-            {product.name}
+            {product.nameCn}
           </h3>
-          <p className="text-xs text-muted">{product.brand}</p>
+          <p className="text-xs text-muted">{product.name}</p>
         </div>
         <div className="flex items-center gap-1 text-amber-400 flex-shrink-0">
           <Star className="w-3.5 h-3.5 fill-current" />

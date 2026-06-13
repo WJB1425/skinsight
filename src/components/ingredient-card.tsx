@@ -50,7 +50,7 @@ export function IngredientCard({ ingredient, index = 0 }: IngredientCardProps) {
         <span className="badge bg-white/5 text-muted border border-border">
           {ingredient.category}
         </span>
-        {ingredient.功效.map((tag, i) => (
+        {ingredient.functions.map((tag, i) => (
           <span key={i} className="badge bg-primary/10 text-primary/80 border border-primary/20">
             {tag}
           </span>

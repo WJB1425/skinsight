@@ -6,7 +6,7 @@ import { Search, Filter, FlaskConical } from 'lucide-react';
 import { IngredientCard } from '@/components/ingredient-card';
 import { IngredientDetail } from '@/components/ingredient-detail';
 import { ConflictAlert } from '@/components/conflict-alert';
-import { mockIngredients, conflictRules } from '@/lib/mock-data';
+import { ingredients, conflictRules } from '@/lib/mock-data';
 import type { Ingredient } from '@/lib/mock-data';
 
 export default function IngredientsPage() {
@@ -16,12 +16,12 @@ export default function IngredientsPage() {
   const [activeConflicts] = useState(conflictRules);
 
   const categories = useMemo(() => {
-    const cats = new Set(mockIngredients.map((i) => i.category));
+    const cats = new Set(ingredients.map((i) => i.category));
     return ['all', ...Array.from(cats)];
   }, []);
 
   const filteredIngredients = useMemo(() => {
-    return mockIngredients.filter((ing) => {
+    return ingredients.filter((ing) => {
       const matchesSearch =
         ing.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ing.nameCn.includes(searchQuery);

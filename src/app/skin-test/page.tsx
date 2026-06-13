@@ -97,7 +97,7 @@ export default function SkinTestPage() {
           transition={{ delay: 0.4 }}
         >
           {analysisComplete ? (
-            <AnalysisResult result={mockSkinResults} />
+            <AnalysisResult result={mockSkinResults.combination} />
           ) : (
             <div className="card flex flex-col items-center justify-center min-h-[400px] text-center">
               <div className="w-16 h-16 rounded-2xl bg-surface-hover flex items-center justify-center mb-4">

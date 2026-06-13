@@ -1,201 +1,1150 @@
-// Mock data for SkinSight MVP
+// SkinSight 成分数据库 - MVP 版本
+// 10 个热门品牌 × 2 个主打产品 = 20 个产品
+// 每个产品包含核心成分表
 
+// ==================== 品牌数据 ====================
+export interface Brand {
+  id: string;
+  name: string;
+  nameCn: string;
+  country: string;
+  description: string;
+  logo?: string;
+}
+
+export const brands: Brand[] = [
+  {
+    id: 'proya',
+    name: 'Proya',
+    nameCn: '珀莱雅',
+    country: '中国',
+    description: '中国本土美妆品牌，专注科学护肤，双抗精华和红宝石精华是明星产品。',
+  },
+  {
+    id: 'winona',
+    name: 'Winona',
+    nameCn: '薇诺娜',
+    country: '中国',
+    description: '专注敏感肌肤护理，采用云南高原植物提取物，皮肤科推荐品牌。',
+  },
+  {
+    id: 'bloomage',
+    name: 'Bloomage Biotech',
+    nameCn: '华熙生物',
+    country: '中国',
+    description: '全球最大透明质酸生产商，旗下有润百颜、夸迪等品牌。',
+  },
+  {
+    id: 'chando',
+    name: 'Chando',
+    nameCn: '自然堂',
+    country: '中国',
+    description: '伽蓝集团旗下品牌，采用喜马拉雅植物成分，冰肌水是明星产品。',
+  },
+  {
+    id: 'pechoin',
+    name: 'Pechoin',
+    nameCn: '百雀羚',
+    country: '中国',
+    description: '百年国货品牌，草本护肤理念，水能量系列深受好评。',
+  },
+  {
+    id: 'inoherb',
+    name: 'Inoherb',
+    nameCn: '相宜本草',
+    country: '中国',
+    description: '汉方草本护肤，红景天系列是美白明星产品。',
+  },
+  {
+    id: 'skinceuticals',
+    name: 'SkinCeuticals',
+    nameCn: '修丽可',
+    country: '美国',
+    description: '专业护肤品牌，CE 经典抗氧瓶和色修精华是行业标杆。',
+  },
+  {
+    id: 'theordinary',
+    name: 'The Ordinary',
+    nameCn: 'The Ordinary',
+    country: '加拿大',
+    description: '原料桶品牌，高浓度单一成分，性价比极高。',
+  },
+  {
+    id: 'cerave',
+    name: 'CeraVe',
+    nameCn: '适乐肤',
+    country: '美国',
+    description: '神经酰胺修护专家，皮肤科医生推荐，敏感肌友好。',
+  },
+  {
+    id: 'vichy',
+    name: 'Vichy',
+    nameCn: '薇姿',
+    country: '法国',
+    description: '欧莱雅集团药妆品牌，81% 温泉水配方，敏可舒系列。',
+  },
+];
+
+// ==================== 成分数据 ====================
 export interface Ingredient {
   id: string;
   name: string;
   nameCn: string;
-  safetyScore: number; // 0-10, higher = safer
+  smiles?: string; // SMILES 格式，用于生成化学结构图
+  safetyScore: number; // 0-10，越高越安全
   category: string;
- 功效: string[];
+  functions: string[];
   description: string;
-  structureUrl?: string;
+  irritationRisk: 'low' | 'medium' | 'high';
+  pregnantSafe: boolean;
 }
 
-export interface SkinAnalysisResult {
-  skinType: 'dry' | 'oily' | 'combination' | 'sensitive' | 'normal';
-  skinTypeCn: string;
-  moisture: number; // 0-100
-  oiliness: number; // 0-100
-  sensitivity: number; // 0-100
-  concerns: string[];
-  recommendedIngredients: string[];
-}
+export const ingredients: Ingredient[] = [
+  // 保湿类
+  {
+    id: 'hyaluronic-acid',
+    name: 'Hyaluronic Acid',
+    nameCn: '透明质酸',
+    smiles: 'OC[C@H]1O[C@H](CO)[C@@H](O)[C@H](O)[C@H]1O',
+    safetyScore: 10,
+    category: '保湿剂',
+    functions: ['深层保湿', '填充细纹', '舒缓'],
+    description: '天然存在于人体的多糖类物质，能吸收自身重量 1000 倍的水分，是优秀的保湿成分。分子量越小渗透越深。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'glycerin',
+    name: 'Glycerin',
+    nameCn: '甘油',
+    smiles: 'C(C(CO)O)O',
+    safetyScore: 10,
+    category: '保湿剂',
+    functions: ['基础保湿', '柔润', '溶剂'],
+    description: '最经典的保湿成分，吸湿性强，能在皮肤表面形成保湿膜。几乎适用于所有肤质。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'ceramides',
+    name: 'Ceramides',
+    nameCn: '神经酰胺',
+    smiles: 'CCCCCCCCCCCCCCCC(=O)N[C@@H](CO)[C@H](O)C=CCCCCCCCCCCCC',
+    safetyScore: 10,
+    category: '脂质/屏障修护',
+    functions: ['修护屏障', '保湿', '舒缓'],
+    description: '皮肤天然屏障的重要组成部分，占角质层脂质的 50%。补充神经酰胺可以修复受损的皮肤屏障，减少水分流失。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'squalane',
+    name: 'Squalane',
+    nameCn: '角鲨烷',
+    smiles: 'CC(C)CCCC(C)CCCC(C)CCCC(C)C',
+    safetyScore: 10,
+    category: '保湿/柔润',
+    functions: ['保湿', '抗氧化', '亲肤'],
+    description: '人体皮脂中天然存在的成分，稳定性好，亲肤性极佳。能形成保护膜防止水分蒸发，适合干性和敏感肌。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'panthenol',
+    name: 'Panthenol',
+    nameCn: '泛醇 (维生素 B5)',
+    smiles: 'OCC(C)(C)[C@@H](O)C(=O)NCCC(=O)O',
+    safetyScore: 10,
+    category: '保湿/修护',
+    functions: ['保湿', '修护', '舒缓'],
+    description: '维生素 B5 的前体，渗入皮肤后转化为泛酸。能促进皮肤屏障修复，减少经皮水分流失，舒缓刺激。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
 
+  // 美白/提亮类
+  {
+    id: 'niacinamide',
+    name: 'Niacinamide',
+    nameCn: '烟酰胺',
+    smiles: 'NC(=O)c1ccc[nH]c1',
+    safetyScore: 9,
+    category: '维生素/美白',
+    functions: ['美白', '控油', '修护屏障', '抗炎'],
+    description: '维生素 B3 衍生物，全能型成分。能抑制黑色素转运，减少色素沉着；控制油脂分泌；强化皮肤屏障。浓度 2-5% 效果最佳。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'vitamin-c',
+    name: 'Ascorbic Acid (Vitamin C)',
+    nameCn: '维生素 C (抗坏血酸)',
+    smiles: 'C(C(C1C(=C(C(=O)O1)O)O)O)O',
+    safetyScore: 8,
+    category: '抗氧化/美白',
+    functions: ['抗氧化', '提亮肤色', '促进胶原', '防晒协同'],
+    description: '强效抗氧化剂，能中和自由基，减少光老化损伤。促进胶原蛋白合成，抑制黑色素生成。左旋 C (L-ascorbic acid) 效果最强但稳定性差。',
+    irritationRisk: 'medium',
+    pregnantSafe: true,
+  },
+  {
+    id: 'arbutin',
+    name: 'Alpha-Arbutin',
+    nameCn: 'α-熊果苷',
+    smiles: 'OC[C@H]1O[C@H](c2ccc(O)cc2)[C@@H](O)[C@H](O)[C@H]1O',
+    safetyScore: 9,
+    category: '美白',
+    functions: ['美白', '淡斑', '抗氧化'],
+    description: '熊果提取物中的美白活性成分，通过抑制酪氨酸酶活性减少黑色素生成。比β-熊果苷效果强 10 倍，温和不刺激。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'tranexamic-acid',
+    name: 'Tranexamic Acid',
+    nameCn: '传明酸 (氨甲环酸)',
+    smiles: 'NC(=O)C[C@H](N)CC(=O)O',
+    safetyScore: 8,
+    category: '美白/抗炎',
+    functions: ['美白', '淡斑', '抗炎', '改善红血丝'],
+    description: '原本用于止血的药物成分，发现能抑制黑色素生成和血管增生。对黄褐斑、炎症后色素沉着有显著效果。',
+    irritationRisk: 'low',
+    pregnantSafe: false,
+  },
+  {
+    id: 'kojic-acid',
+    name: 'Kojic Acid',
+    nameCn: '曲酸',
+    smiles: 'OCc1oc(=O)c(O)c(O)c1',
+    safetyScore: 7,
+    category: '美白',
+    functions: ['美白', '淡斑', '抗菌'],
+    description: '米曲霉发酵产物，通过螯合铜离子抑制酪氨酸酶活性。美白效果显著但有一定刺激性，浓度一般不超过 2%。',
+    irritationRisk: 'medium',
+    pregnantSafe: false,
+  },
+
+  // 抗衰老类
+  {
+    id: 'retinol',
+    name: 'Retinol',
+    nameCn: '视黄醇 (A 醇)',
+    smiles: 'CC1=C(C(CCC1)(C)C)C=CC(=CC=CC(=CCO)C)C',
+    safetyScore: 6,
+    category: '维生素 A 衍生物/抗老',
+    functions: ['抗衰老', '促进胶原', '改善细纹', '加速细胞更新'],
+    description: '维生素 A 的活性形式，是研究最充分的抗衰老成分之一。能促进细胞更新和胶原蛋白生成，改善细纹和色素沉着。需要建立耐受，孕妇禁用。',
+    irritationRisk: 'high',
+    pregnantSafe: false,
+  },
+  {
+    id: 'retinal',
+    name: 'Retinal (Retinaldehyde)',
+    nameCn: '视黄醛 (A 醛)',
+    smiles: 'CC1=C(C(CCC1)(C)C)C=CC(=CC=CC(=CC=O)C)C',
+    safetyScore: 6,
+    category: '维生素 A 衍生物/抗老',
+    functions: ['抗衰老', '促进胶原', '改善细纹'],
+    description: '视黄醇的氧化形式，只需一步转化即可成为活性 A 酸，效果比视黄醇强 10 倍。刺激性也更高，适合已建立耐受的用户。',
+    irritationRisk: 'high',
+    pregnantSafe: false,
+  },
+  {
+    id: 'bakuchiol',
+    name: 'Bakuchiol',
+    nameCn: '补骨脂酚',
+    smiles: 'CC(C)=CCCc1ccc(O)c(C(C)(C)C)c1',
+    safetyScore: 9,
+    category: '植物抗老',
+    functions: ['抗衰老', '抗氧化', '抗炎', '温和'],
+    description: '从补骨脂中提取的植物成分，作用机制类似视黄醇但更温和。能激活胶原蛋白生成，改善细纹，且无光敏性，孕妇可用。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'peptides',
+    name: 'Peptides (Copper Peptide)',
+    nameCn: '胜肽 (蓝铜胜肽)',
+    smiles: 'N[C@@H](CC(=O)N)C(=O)N[C@@H](C)C(=O)N[C@@H](CC(=O)O)C(=O)N[C@@H](CCSC)C(=O)O',
+    safetyScore: 10,
+    category: '抗老/修护',
+    functions: ['抗衰老', '促进胶原', '修护', '抗炎'],
+    description: '氨基酸短链，能向皮肤细胞传递信号。蓝铜胜肽 (GHK-Cu) 能促进胶原蛋白和弹性蛋白生成，加速伤口愈合，抗炎抗氧化。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'boseine',
+    name: 'Pro-Xylane (Boseine)',
+    nameCn: '玻色因 (羟丙基四氢喃三醇)',
+    smiles: 'OCC1OC(O)C(O)C(O)C1O',
+    safetyScore: 10,
+    category: '抗老/保湿',
+    functions: ['抗衰老', '促进糖胺聚糖', '紧致', '保湿'],
+    description: '欧莱雅集团专利成分，从山毛榉木糖中提取。能促进糖胺聚糖 (GAGs) 合成，增强皮肤结构，改善松弛和细纹。温和抗老首选。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+
+  // 酸类/去角质
+  {
+    id: 'salicylic-acid',
+    name: 'Salicylic Acid',
+    nameCn: '水杨酸 (BHA)',
+    smiles: 'OC(=O)c1ccccc1O',
+    safetyScore: 7,
+    category: 'BHA/去角质',
+    functions: ['去角质', '疏通毛孔', '控油', '抗炎'],
+    description: '脂溶性β-羟基酸，能深入毛孔溶解油脂，疏通堵塞。适合油性和痘痘肌肤，有抗炎作用。浓度一般 0.5-2%，孕妇慎用。',
+    irritationRisk: 'medium',
+    pregnantSafe: false,
+  },
+  {
+    id: 'glycolic-acid',
+    name: 'Glycolic Acid',
+    nameCn: '甘醇酸 (AHA)',
+    smiles: 'OC(=O)CO',
+    safetyScore: 7,
+    category: 'AHA/去角质',
+    functions: ['去角质', '提亮', '促进吸收', '保湿'],
+    description: '分子量最小的 AHA，渗透力最强。能溶解角质层细胞间连接，加速角质更新。浓度 5-10% 日常可用，更高浓度需专业操作。',
+    irritationRisk: 'medium',
+    pregnantSafe: false,
+  },
+  {
+    id: 'lactic-acid',
+    name: 'Lactic Acid',
+    nameCn: '乳酸 (AHA)',
+    smiles: 'CC(O)C(=O)O',
+    safetyScore: 8,
+    category: 'AHA/去角质',
+    functions: ['温和去角质', '保湿', '提亮'],
+    description: '比甘醇酸更温和的 AHA，同时有保湿作用。适合敏感肌和干性肌肤，能温和去除老废角质，改善粗糙。',
+    irritationRisk: 'low',
+    pregnantSafe: false,
+  },
+  {
+    id: 'mandelic-acid',
+    name: 'Mandelic Acid',
+    nameCn: '杏仁酸 (AHA)',
+    smiles: 'OC(c1ccccc1)C(=O)O',
+    safetyScore: 8,
+    category: 'AHA/去角质',
+    functions: ['温和去角质', '美白', '控油'],
+    description: '大分子 AHA，渗透慢、刺激小。有亲脂性，适合油性敏感肌。能温和去角质、提亮肤色，是新手刷酸入门首选。',
+    irritationRisk: 'low',
+    pregnantSafe: false,
+  },
+
+  // 抗炎/舒缓类
+  {
+    id: 'centella',
+    name: 'Centella Asiatica Extract',
+    nameCn: '积雪草提取物',
+    smiles: 'O=C(O)C[C@@H](O)[C@H](O)C=C',
+    safetyScore: 10,
+    category: '植物舒缓',
+    functions: ['舒缓', '修护', '抗炎', '促进愈合'],
+    description: '传统中草药，含有积雪草苷、羟基积雪草苷等活性成分。能促进皮肤愈合，减少炎症反应，修复受损屏障。敏感肌救星。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'allantoin',
+    name: 'Allantoin',
+    nameCn: '尿囊素',
+    smiles: 'NC(=O)NC(=O)NC1C(=O)NC(=O)N1',
+    safetyScore: 10,
+    category: '舒缓/修护',
+    functions: ['舒缓', '保湿', '促进愈合'],
+    description: '从紫草或尿素中提取，能促进细胞增殖和组织修复。有保湿、舒缓、软化角质的作用，适合敏感和受损肌肤。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'bisabolol',
+    name: 'Bisabolol',
+    nameCn: '红没药醇',
+    smiles: 'CC(C)=CCC[C@](C)(O)C1=CC=C(C)C=C1',
+    safetyScore: 10,
+    category: '舒缓/抗炎',
+    functions: ['抗炎', '舒缓', '抗菌'],
+    description: '从洋甘菊中提取的活性成分，有强大的抗炎和舒缓作用。能减少皮肤刺激，促进愈合，适合敏感肌和术后修复。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'madecassoside',
+    name: 'Madecassoside',
+    nameCn: '羟基积雪草苷',
+    smiles: 'O[C@H]1[C@@H](O)[C@H](O)[C@@H](O)[C@@H](OC[C@H]2CC=C(C)[C@H](CC[C@H](C)[C@@H](O)[C@H](O)C2)C(=O)O)[C@H]1O',
+    safetyScore: 10,
+    category: '舒缓/修护',
+    functions: ['深层修护', '抗炎', '促进胶原'],
+    description: '积雪草中最有效的活性成分，能促进胶原蛋白合成，加速伤口愈合。对痘印、红血丝、敏感泛红有显著改善作用。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+
+  // 防晒/抗氧化类
+  {
+    id: 'ferulic-acid',
+    name: 'Ferulic Acid',
+    nameCn: '阿魏酸',
+    smiles: 'COc1cc(C=CC(=O)O)ccc1O',
+    safetyScore: 9,
+    category: '抗氧化',
+    functions: ['抗氧化', '稳定 VC/VE', '防晒协同'],
+    description: '植物细胞壁中的酚酸，强效抗氧化。与维生素 C 和 E 配合使用时，抗氧化效果呈指数级增强。是修丽可 CE 经典瓶的核心成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'vitamin-e',
+    name: 'Tocopherol (Vitamin E)',
+    nameCn: '生育酚 (维生素 E)',
+    smiles: 'CC(C)CCCC(C)CCCC(C)CCCC1C(C)C(C)(C)C(O)C1',
+    safetyScore: 10,
+    category: '抗氧化/保湿',
+    functions: ['抗氧化', '保湿', '修护', '稳定 VC'],
+    description: '脂溶性抗氧化剂，能保护细胞膜免受氧化损伤。与维生素 C 配合有协同增效作用。有保湿和修护功能，适合干性肌肤。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'resveratrol',
+    name: 'Resveratrol',
+    nameCn: '白藜芦醇',
+    smiles: 'OCc1ccc(O)cc1',
+    safetyScore: 9,
+    category: '抗氧化/抗老',
+    functions: ['抗氧化', '抗炎', '抗衰老', '美白'],
+    description: '葡萄皮中提取的多酚类化合物，强效抗氧化和抗炎。能激活 SIRT1 长寿基因，抑制黑色素生成，是高端抗老产品的热门成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'astaxanthin',
+    name: 'Astaxanthin',
+    nameCn: '虾青素',
+    smiles: 'CC(C)=CCC[C@](C)(O)C1=CC(=O)C(C)=C(C)[C@H]1/C=C/C(C)=C/C=C/C(C)=C/C=C/[C@H](C(C)=C)CC[C@@](C)(O)C2=CC(=O)C(C)=C(C)[C@H]2',
+    safetyScore: 9,
+    category: '抗氧化',
+    functions: ['强效抗氧化', '抗炎', '防晒协同'],
+    description: '天然类胡萝卜素，抗氧化能力是维生素 E 的 500 倍。能穿透细胞膜，从内外两侧保护细胞。有抗炎和防晒协同作用。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+
+  // 其他常见成分
+  {
+    id: 'zinc-pca',
+    name: 'Zinc PCA',
+    nameCn: 'PCA 锌',
+    smiles: 'O=C(O)C[C@@H](C(=O)O)NC(=O)[C@@H](N)CC(=O)O.[Zn+2]',
+    safetyScore: 9,
+    category: '控油/抗炎',
+    functions: ['控油', '抗炎', '抗菌', '调节皮脂'],
+    description: '锌与 PCA (吡咯烷酮酸) 的结合物，能有效控制油脂分泌，抑制痤疮丙酸杆菌。是 The Ordinary 烟酰胺精华的辅助成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'azelaic-acid',
+    name: 'Azelaic Acid',
+    nameCn: '壬二酸 (杜鹃花酸)',
+    smiles: 'OC(=O)CCCCCCCC(=O)O',
+    safetyScore: 8,
+    category: '美白/抗炎',
+    functions: ['美白', '抗炎', '去角质', '祛痘'],
+    description: '天然存在于谷物中的二羧酸，能抑制酪氨酸酶活性，减少黑色素生成。有抗炎和抗菌作用，对玫瑰痤疮和痘痘肌友好。',
+    irritationRisk: 'medium',
+    pregnantSafe: true,
+  },
+
+  // ==================== 化妆品/彩妆常用成分 ====================
+  {
+    id: 'titanium-dioxide',
+    name: 'Titanium Dioxide',
+    nameCn: '二氧化钛',
+    smiles: 'O=[Ti]=O',
+    safetyScore: 10,
+    category: '物理防晒/着色',
+    functions: ['物理防晒', '着色', '遮盖', '控油'],
+    description: '最常见的物理防晒剂，通过反射紫外线起到防护作用。同时是粉底和隔离中的白色颜料，有轻微控油效果。纳米级更透明，但争议更大。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'zinc-oxide',
+    name: 'Zinc Oxide',
+    nameCn: '氧化锌',
+    smiles: '[Zn]=O',
+    safetyScore: 10,
+    category: '物理防晒/抗菌',
+    functions: ['物理防晒', '抗菌', '控油', '舒缓'],
+    description: '广谱物理防晒剂，覆盖 UVA 和 UVB。有收敛和抗菌作用，适合痘痘肌和敏感肌。是防晒隔离和 BB 霜的核心成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'dimethicone',
+    name: 'Dimethicone',
+    nameCn: '聚二甲基硅氧烷 (硅油)',
+    smiles: 'C[Si](C)(O[Si](C)(C)O[Si](C)(C)O)C',
+    safetyScore: 9,
+    category: '柔润/成膜',
+    functions: ['顺滑', '填毛孔', '成膜', '防水'],
+    description: '最常见的硅油成分，给产品带来丝滑触感。能在皮肤表面形成透气保护膜，填充毛孔和细纹，让底妆更服帖。不会堵塞毛孔。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'cyclopentasiloxane',
+    name: 'Cyclopentasiloxane',
+    nameCn: '环五聚二甲基硅氧烷',
+    smiles: 'C[Si]1(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O[Si](C)(C)O1',
+    safetyScore: 8,
+    category: '挥发性硅油',
+    functions: ['清爽', '易挥发', '顺滑', '帮助成膜'],
+    description: '挥发性硅油，涂抹后迅速挥发，留下干爽丝滑的触感。是妆前乳和防晒中实现"不黏腻"效果的关键成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'glyceryl-stearate',
+    name: 'Glyceryl Stearate',
+    nameCn: '甘油硬脂酸酯',
+    smiles: 'CCCCCCCCCCCCCCCC(=O)OCC(CO)O',
+    safetyScore: 10,
+    category: '乳化剂/柔润',
+    functions: ['乳化', '稳定配方', '柔润', '增稠'],
+    description: '由甘油和硬脂酸形成的乳化剂，帮助油相和水相混合均匀。同时有柔润作用，让乳霜质地更细腻。非常安全的成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'cetearyl-alcohol',
+    name: 'Cetearyl Alcohol',
+    nameCn: '鲸蜡硬脂醇',
+    smiles: 'CCCCCCCCCCCCCCCCO',
+    safetyScore: 10,
+    category: '脂肪醇/柔润',
+    functions: ['增稠', '柔润', '乳化助剂', '改善质地'],
+    description: '不是乙醇酒精，而是长链脂肪醇。增加乳霜的稠度和滋润感，让质地更柔滑。对皮肤无刺激，与酒精完全不同。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'phenoxyethanol',
+    name: 'Phenoxyethanol',
+    nameCn: '苯氧乙醇',
+    smiles: 'OCc1ccccc1OCC',
+    safetyScore: 7,
+    category: '防腐剂',
+    functions: ['防腐', '抗菌', '延长保质期'],
+    description: '目前最常见的化妆品防腐剂，替代了争议较大的对羟基苯甲酸酯类 (parabens)。在浓度低于 1% 时安全性良好，极少数人可能有轻微刺激感。',
+    irritationRisk: 'medium',
+    pregnantSafe: true,
+  },
+  {
+    id: 'ethylhexylglycerin',
+    name: 'Ethylhexylglycerin',
+    nameCn: '乙基己基甘油',
+    smiles: 'CCCCC(CO)OCC',
+    safetyScore: 9,
+    category: '防腐助剂/保湿',
+    functions: ['防腐增效', '保湿', '减少刺激'],
+    description: '本身有微弱抗菌作用，主要作为苯氧乙醇的增效剂，降低防腐剂总用量。同时有保湿和减少皮肤刺激的功能。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'fragrance',
+    name: 'Fragrance (Parfum)',
+    nameCn: '香精',
+    smiles: '',
+    safetyScore: 5,
+    category: '香料',
+    functions: ['提供香味', '改善使用感'],
+    description: '化妆品中的香味来源，可能由数十种化合物组成。是最常见的过敏原之一，敏感肌和孕妇建议避开。无香型产品更安全可靠。',
+    irritationRisk: 'high',
+    pregnantSafe: false,
+  },
+  {
+    id: 'octocrylene',
+    name: 'Octocrylene',
+    nameCn: '奥克立林',
+    smiles: 'CCCCCCCCOC(=O)C(=C)c1ccccc1',
+    safetyScore: 7,
+    category: '化学防晒',
+    functions: ['UVB 防护', '稳定其他防晒剂', '防水'],
+    description: '化学防晒剂，主要吸收 UVB 和部分 UVA II。能帮助稳定其他不稳定的防晒成分 (如阿伏苯宗)。质地较黏腻，有极低概率引起过敏。',
+    irritationRisk: 'medium',
+    pregnantSafe: true,
+  },
+  {
+    id: 'avobenzone',
+    name: 'Avobenzone',
+    nameCn: '阿伏苯宗',
+    smiles: 'COc1ccc(C(=O)Cc2ccc(OC)cc2)cc1',
+    safetyScore: 8,
+    category: '化学防晒',
+    functions: ['UVA 防护', '广谱防晒'],
+    description: '最重要的 UVA 化学防晒剂之一，覆盖全波段 UVA。但光稳定性差，需要与奥克立林等稳定剂配合使用。是目前最好的 UVA 化学防护方案。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'tinosorb-s',
+    name: 'Bemotrizinol (Tinosorb S)',
+    nameCn: '双 - 乙基己氧苯酚甲氧苯基三嗪',
+    smiles: 'CC(C)OCc1ccc(Oc2cc(Nc3ccccc3)nc(Nc3ccc(OCC(C)C)cc3)n2)cc1',
+    safetyScore: 9,
+    category: '化学防晒',
+    functions: ['广谱防晒', 'UVA/UVB', '光稳定'],
+    description: '新一代广谱化学防晒剂，覆盖 UVA 和 UVB。光稳定性极佳，不会降解。在欧洲和亚洲广泛使用，安全性高。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'iron-oxides',
+    name: 'Iron Oxides',
+    nameCn: '氧化铁类',
+    smiles: 'O=[Fe]',
+    safetyScore: 10,
+    category: '着色剂',
+    functions: ['调色', '遮瑕', '可见光防护'],
+    description: '粉底、隔离、防晒中的着色剂，提供黄色、红色、黑色等不同色调。氧化铁还能防护可见光 (蓝光)，对黄褐斑患者特别有用。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'mica',
+    name: 'Mica',
+    nameCn: '云母',
+    smiles: '',
+    safetyScore: 10,
+    category: '着色/珠光',
+    functions: ['珠光', '提亮', '顺滑', '散粉基底'],
+    description: '天然矿物粉末，赋予产品珠光和提亮效果。是散粉、高光、眼影的核心成分。颗粒越细腻，妆效越自然。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'talc',
+    name: 'Talc',
+    nameCn: '滑石粉',
+    smiles: '',
+    safetyScore: 8,
+    category: '吸油/柔焦',
+    functions: ['吸油', '柔焦', '顺滑', '散粉'],
+    description: '最柔软的天然矿物，有极强的吸油和柔焦效果。是散粉和粉饼的主要成分。化妆品级滑石粉不含石棉，安全性有保障。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'silica',
+    name: 'Silica',
+    nameCn: '硅石',
+    smiles: 'O=[Si]=O',
+    safetyScore: 10,
+    category: '吸油/柔焦',
+    functions: ['吸油', '控油', '柔焦', '定妆'],
+    description: '微孔结构能吸收自身重量数倍的油脂，是控油和柔焦效果的关键。常用于妆前乳、散粉和控油产品中。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'caprylyl-methicone',
+    name: 'Caprylyl Methicone',
+    nameCn: '辛基聚甲基硅氧烷',
+    smiles: 'C[Si](C)(C)CCCC(C)C',
+    safetyScore: 9,
+    category: '挥发性硅油',
+    functions: ['清爽', '帮助分散色粉', '防水', '持久'],
+    description: '低黏度挥发性硅油，帮助色粉在配方中均匀分散。是底妆产品中实现"持久不脱妆"效果的关键成分。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'acrylates-copolymer',
+    name: 'Acrylates Copolymer',
+    nameCn: '丙烯酸 (酯) 类共聚物',
+    smiles: '',
+    safetyScore: 9,
+    category: '成膜剂',
+    functions: ['成膜', '防水防汗', '持久', '定型'],
+    description: '在皮肤表面形成薄膜，让底妆持久不脱。是"持妆粉底液"和防水防晒的核心成分。成膜后耐水耐摩擦。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'trisiloxane',
+    name: 'Trisiloxane',
+    nameCn: '三硅氧烷',
+    smiles: 'C[Si](C)(C)O[Si](C)(C)O[Si](C)(C)C',
+    safetyScore: 9,
+    category: '挥发性硅油',
+    functions: ['超清爽', '帮助铺展', '速干', '帮助成膜'],
+    description: '挥发性极高的硅油，涂抹后几乎瞬间挥发，带来极致清爽的肤感。是"水润不黏腻"型防晒和妆前乳的秘密武器。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'tocopheryl-acetate',
+    name: 'Tocopheryl Acetate',
+    nameCn: '生育酚乙酸酯 (维生素 E 衍生物)',
+    smiles: 'CC(=O)OC1=C(C)C(C)=C(C)C(C)=C1CCC(C)CCCC(C)CCCC(C)CCCC(C)C',
+    safetyScore: 10,
+    category: '抗氧化/防腐助剂',
+    functions: ['抗氧化', '保湿', '延长保质期', '稳定配方'],
+    description: '维生素 E 的乙酸酯衍生物，比纯维生素 E 更稳定。在化妆品中作为抗氧化剂和保湿成分，同时帮助延长产品保质期。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+  {
+    id: 'adenosine',
+    name: 'Adenosine',
+    nameCn: '腺苷',
+    smiles: 'NC1=NC=NC2=C1N=CN2[C@@H]3O[C@H](CO)[C@@H](O)[C@H]3O',
+    safetyScore: 10,
+    category: '抗老/修护',
+    functions: ['抗衰老', '抗炎', '促进愈合'],
+    description: '人体天然存在的核苷，能抑制炎症因子释放，促进胶原蛋白合成。是韩系护肤品中常见的抗老成分，温和有效。',
+    irritationRisk: 'low',
+    pregnantSafe: true,
+  },
+];
+
+// ==================== 产品数据 ====================
 export interface Product {
   id: string;
   name: string;
-  brand: string;
-  price: number;
-  image: string;
+  nameCn: string;
+  brandId: string;
+  price: number; // 人民币
   category: string;
-  rating: number;
-  keyIngredients: string[];
   skinTypes: string[];
   description: string;
+  keyIngredients: string[]; // 成分 ID
+  rating: number;
+  image?: string;
 }
 
-export const mockIngredients: Ingredient[] = [
+export const products: Product[] = [
+  // 珀莱雅
   {
-    id: '1',
-    name: 'Niacinamide',
-    nameCn: '烟酰胺',
-    safetyScore: 9,
-    category: '维生素',
-    功效: ['美白', '控油', '修护屏障'],
-    description: '维生素B3衍生物，具有多种护肤功效，包括减少色素沉着、控制油脂分泌和强化皮肤屏障。',
-  },
-  {
-    id: '2',
-    name: 'Hyaluronic Acid',
-    nameCn: '透明质酸',
-    safetyScore: 10,
-    category: '保湿剂',
-    功效: ['深层保湿', '填充细纹', '舒缓'],
-    description: '天然存在于人体的多糖类物质，能吸收自身重量1000倍的水分，是优秀的保湿成分。',
-  },
-  {
-    id: '3',
-    name: 'Retinol',
-    nameCn: '视黄醇',
-    safetyScore: 6,
-    category: '维生素A衍生物',
-    功效: ['抗衰老', '促进胶原', '改善细纹'],
-    description: '维生素A的活性形式，是研究最充分的抗衰老成分之一，能促进细胞更新和胶原蛋白生成。',
-  },
-  {
-    id: '4',
-    name: 'Salicylic Acid',
-    nameCn: '水杨酸',
-    safetyScore: 7,
-    category: 'BHA',
-    功效: ['去角质', '疏通毛孔', '控油'],
-    description: '脂溶性β-羟基酸，能深入毛孔清洁，适合油性和痘痘肌肤使用。',
-  },
-  {
-    id: '5',
-    name: 'Vitamin C',
-    nameCn: '维生素C',
-    safetyScore: 8,
-    category: '抗氧化剂',
-    功效: ['抗氧化', '提亮肤色', '促进胶原'],
-    description: '强效抗氧化剂，能中和自由基，减少光老化损伤，促进胶原蛋白合成。',
-  },
-  {
-    id: '6',
-    name: 'Ceramides',
-    nameCn: '神经酰胺',
-    safetyScore: 10,
-    category: '脂质',
-    功效: ['修护屏障', '保湿', '舒缓'],
-    description: '皮肤天然屏障的重要组成部分，补充神经酰胺可以修复受损的皮肤屏障。',
-  },
-];
-
-export const mockSkinResults: SkinAnalysisResult = {
-  skinType: 'combination',
-  skinTypeCn: '混合性肌肤',
-  moisture: 65,
-  oiliness: 72,
-  sensitivity: 35,
-  concerns: ['T区出油', '毛孔粗大', '两颊偏干'],
-  recommendedIngredients: ['烟酰胺', '透明质酸', '水杨酸'],
-};
-
-export const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: '烟酰胺精华液',
-    brand: 'The Ordinary',
-    price: 68,
-    image: '/products/niacinamide.jpg',
+    id: 'proya-double-anti',
+    name: 'Double Anti Essence',
+    nameCn: '双抗精华',
+    brandId: 'proya',
+    price: 259,
     category: '精华',
-    rating: 4.5,
-    keyIngredients: ['Niacinamide', 'Zinc PCA'],
-    skinTypes: ['oily', 'combination'],
-    description: '10%高浓度烟酰胺配方，有效控油、细致毛孔、改善肤色不均。',
-  },
-  {
-    id: '2',
-    name: '透明质酸保湿精华',
-    brand: 'Vichy',
-    price: 289,
-    image: '/products/hyaluronic.jpg',
-    category: '精华',
+    skinTypes: ['oily', 'combination', 'normal'],
+    description: '麦角硫因 + 虾青素 + 脱羧肌肽，抗氧抗糖双通路，改善暗沉和黄气。',
+    keyIngredients: ['astaxanthin', 'niacinamide', 'peptides'],
     rating: 4.7,
-    keyIngredients: ['Hyaluronic Acid', 'Vitamin B5'],
-    skinTypes: ['dry', 'normal', 'sensitive'],
-    description: '81%温泉水+三重透明质酸，深层补水，修护皮肤屏障。',
   },
   {
-    id: '3',
-    name: '视黄醇抗老面霜',
-    brand: 'CeraVe',
-    price: 158,
-    image: '/products/retinol.jpg',
+    id: 'proya-ruby',
+    name: 'Ruby Cream',
+    nameCn: '红宝石面霜',
+    brandId: 'proya',
+    price: 289,
     category: '面霜',
-    rating: 4.3,
-    keyIngredients: ['Retinol', 'Ceramides', 'Niacinamide'],
-    skinTypes: ['normal', 'combination'],
-    description: '温和视黄醇配方，配合神经酰胺，抗老同时修护屏障。',
-  },
-  {
-    id: '4',
-    name: '维生素C精华',
-    brand: 'SkinCeuticals',
-    price: 1280,
-    image: '/products/vitc.jpg',
-    category: '精华',
-    rating: 4.8,
-    keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'],
-    skinTypes: ['normal', 'dry', 'combination'],
-    description: '15%左旋维C+1%阿魏酸经典配方，强效抗氧化，提亮肤色。',
-  },
-  {
-    id: '5',
-    name: '水杨酸洁面',
-    brand: 'CeraVe',
-    price: 98,
-    image: '/products/salicylic.jpg',
-    category: '洁面',
-    rating: 4.4,
-    keyIngredients: ['Salicylic Acid', 'Ceramides'],
-    skinTypes: ['oily', 'combination'],
-    description: '含水杨酸的温和洁面，有效清除多余油脂，不破坏皮肤屏障。',
-  },
-  {
-    id: '6',
-    name: '神经酰胺修护霜',
-    brand: 'Illiyoon',
-    price: 89,
-    image: '/products/ceramides.jpg',
-    category: '面霜',
+    skinTypes: ['dry', 'normal', 'combination'],
+    description: '胜肽 + 视黄醇，抗老紧致，改善细纹和松弛。',
+    keyIngredients: ['retinol', 'peptides', 'squalane'],
     rating: 4.6,
-    keyIngredients: ['Ceramides', 'Squalane', 'Panthenol'],
-    skinTypes: ['dry', 'sensitive'],
-    description: '含神经酰胺胶囊的修护面霜，深层滋润，强化皮肤屏障功能。',
+  },
+
+  // 薇诺娜
+  {
+    id: 'winona-barrier',
+    name: 'Barrier Repair Cream',
+    nameCn: '舒敏保湿特护霜',
+    brandId: 'winona',
+    price: 268,
+    category: '面霜',
+    skinTypes: ['sensitive', 'dry'],
+    description: '马齿苋 + 青刺果油，修护敏感屏障，舒缓泛红刺痛。',
+    keyIngredients: ['ceramides', 'panthenol', 'centella'],
+    rating: 4.8,
+  },
+  {
+    id: 'winona-serum',
+    name: 'Soothing Serum',
+    nameCn: '舒敏保湿修护精华',
+    brandId: 'winona',
+    price: 298,
+    category: '精华',
+    skinTypes: ['sensitive', 'dry', 'normal'],
+    description: '青刺果油 + 马齿苋提取物，深层修护敏感肌肤。',
+    keyIngredients: ['ceramides', 'madecassoside', 'bisabolol'],
+    rating: 4.7,
+  },
+
+  // 华熙生物 (润百颜)
+  {
+    id: 'bloomage-ha',
+    name: 'Hyaluronic Acid Serum',
+    nameCn: '润百颜玻尿酸精华',
+    brandId: 'bloomage',
+    price: 199,
+    category: '精华',
+    skinTypes: ['dry', 'normal', 'sensitive'],
+    description: '4D 透明质酸，大小分子分层补水，深层保湿。',
+    keyIngredients: ['hyaluronic-acid', 'glycerin', 'panthenol'],
+    rating: 4.6,
+  },
+  {
+    id: 'bloomage-bright',
+    name: 'Brightening Serum',
+    nameCn: '润百颜光感精华',
+    brandId: 'bloomage',
+    price: 239,
+    category: '精华',
+    skinTypes: ['normal', 'combination'],
+    description: '烟酰胺 + 透明质酸，美白提亮同时保湿。',
+    keyIngredients: ['niacinamide', 'hyaluronic-acid', 'arbutin'],
+    rating: 4.5,
+  },
+
+  // 修丽可
+  {
+    id: 'skinceuticals-ce',
+    name: 'CE Ferulic Serum',
+    nameCn: 'CE 经典抗氧瓶',
+    brandId: 'skinceuticals',
+    price: 1280,
+    category: '精华',
+    skinTypes: ['normal', 'dry', 'combination'],
+    description: '15% 左旋维 C + 1% 维 E + 0.5% 阿魏酸，抗氧化金标准。',
+    keyIngredients: ['vitamin-c', 'vitamin-e', 'ferulic-acid'],
+    rating: 4.9,
+  },
+  {
+    id: 'skinceuticals-b3',
+    name: 'Phyto Corrective Gel',
+    nameCn: '色修精华',
+    brandId: 'skinceuticals',
+    price: 680,
+    category: '精华',
+    skinTypes: ['sensitive', 'combination', 'oily'],
+    description: '百里香 + 橄榄叶 + 黄瓜提取物，舒缓泛红，改善痘印。',
+    keyIngredients: ['centella', 'bisabolol', 'cucumber-extract'],
+    rating: 4.8,
+  },
+
+  // The Ordinary
+  {
+    id: 'to-niacinamide',
+    name: 'Niacinamide 10% + Zinc 1%',
+    nameCn: '烟酰胺精华',
+    brandId: 'theordinary',
+    price: 68,
+    category: '精华',
+    skinTypes: ['oily', 'combination'],
+    description: '10% 高浓度烟酰胺 + 1%PCA 锌，控油、细致毛孔、改善肤色。',
+    keyIngredients: ['niacinamide', 'zinc-pca'],
+    rating: 4.5,
+  },
+  {
+    id: 'to-retinol',
+    name: 'Retinol 0.5% in Squalane',
+    nameCn: '视黄醇精华',
+    brandId: 'theordinary',
+    price: 89,
+    category: '精华',
+    skinTypes: ['normal', 'combination'],
+    description: '0.5% 视黄醇溶于角鲨烷，抗老入门，改善细纹。',
+    keyIngredients: ['retinol', 'squalane'],
+    rating: 4.4,
+  },
+
+  // 适乐肤
+  {
+    id: 'cerave-pm',
+    name: 'PM Facial Moisturizing Lotion',
+    nameCn: 'PM 乳',
+    brandId: 'cerave',
+    price: 98,
+    category: '乳液',
+    skinTypes: ['normal', 'combination', 'sensitive'],
+    description: '神经酰胺 + 烟酰胺 + 透明质酸，夜间修护，温和保湿。',
+    keyIngredients: ['ceramides', 'niacinamide', 'hyaluronic-acid'],
+    rating: 4.7,
+  },
+  {
+    id: 'cerave-retinol',
+    name: 'Resurfacing Retinol Serum',
+    nameCn: '抗老修护精华',
+    brandId: 'cerave',
+    price: 158,
+    category: '精华',
+    skinTypes: ['normal', 'combination'],
+    description: '视黄醇 + 神经酰胺 + 烟酰胺，抗老同时修护屏障。',
+    keyIngredients: ['retinol', 'ceramides', 'niacinamide'],
+    rating: 4.6,
+  },
+
+  // 薇姿
+  {
+    id: 'vichy-mineral',
+    name: 'Mineral 89 Serum',
+    nameCn: '89 火山能量瓶',
+    brandId: 'vichy',
+    price: 289,
+    category: '精华',
+    skinTypes: ['dry', 'normal', 'sensitive'],
+    description: '81% 薇姿温泉水 + 透明质酸，强韧屏障，深层补水。',
+    keyIngredients: ['hyaluronic-acid', 'glycerin'],
+    rating: 4.5,
+  },
+  {
+    id: 'vichy-liftactiv',
+    name: 'Liftactiv Retinol Serum',
+    nameCn: '视黄醇抗老精华',
+    brandId: 'vichy',
+    price: 329,
+    category: '精华',
+    skinTypes: ['normal', 'dry'],
+    description: '0.2% 视黄醇 + 维生素 B3，抗老紧致，改善细纹。',
+    keyIngredients: ['retinol', 'niacinamide', 'vitamin-e'],
+    rating: 4.4,
+  },
+
+  // 自然堂
+  {
+    id: 'chando-ice',
+    name: 'Ice Muscle Water',
+    nameCn: '冰肌水',
+    brandId: 'chando',
+    price: 128,
+    category: '爽肤水',
+    skinTypes: ['dry', 'normal'],
+    description: '喜马拉雅冰川水 + 透明质酸，深层补水，清爽不黏腻。',
+    keyIngredients: ['hyaluronic-acid', 'glycerin', 'panthenol'],
+    rating: 4.4,
+  },
+  {
+    id: 'chando-bright',
+    name: 'Brightening Serum',
+    nameCn: '雪域精粹精华',
+    brandId: 'chando',
+    price: 198,
+    category: '精华',
+    skinTypes: ['normal', 'combination'],
+    description: '喜马拉雅植物提取物 + 烟酰胺，提亮肤色，改善暗沉。',
+    keyIngredients: ['niacinamide', 'arbutin', 'vitamin-e'],
+    rating: 4.3,
+  },
+
+  // 百雀羚
+  {
+    id: 'pechoin-water',
+    name: 'Water Energy Serum',
+    nameCn: '水能量精华',
+    brandId: 'pechoin',
+    price: 168,
+    category: '精华',
+    skinTypes: ['dry', 'normal'],
+    description: '草本精粹 + 透明质酸，深层补水，改善干燥。',
+    keyIngredients: ['hyaluronic-acid', 'glycerin', 'centella'],
+    rating: 4.4,
+  },
+  {
+    id: 'pechoin-bright',
+    name: 'Brightening Cream',
+    nameCn: '亮肤霜',
+    brandId: 'pechoin',
+    price: 189,
+    category: '面霜',
+    skinTypes: ['normal', 'dry'],
+    description: '草本美白成分 + 烟酰胺，温和提亮，改善暗沉。',
+    keyIngredients: ['niacinamide', 'arbutin', 'vitamin-e'],
+    rating: 4.3,
+  },
+
+  // 相宜本草
+  {
+    id: 'inoherb-rhodiola',
+    name: 'Rhodiola Brightening Serum',
+    nameCn: '红景天美白精华',
+    brandId: 'inoherb',
+    price: 158,
+    category: '精华',
+    skinTypes: ['normal', 'combination'],
+    description: '红景天提取物 + 熊果苷，美白提亮，改善暗沉。',
+    keyIngredients: ['arbutin', 'vitamin-c', 'niacinamide'],
+    rating: 4.4,
+  },
+  {
+    id: 'inoherb-cleanser',
+    name: 'Herbal Cleanser',
+    nameCn: '草本洁面乳',
+    brandId: 'inoherb',
+    price: 68,
+    category: '洁面',
+    skinTypes: ['all'],
+    description: '草本配方，温和清洁，不紧绷。',
+    keyIngredients: ['glycerin', 'centella'],
+    rating: 4.3,
   },
 ];
 
+// ==================== 成分冲突规则 ====================
 export interface ConflictRule {
   ingredients: string[];
   severity: 'safe' | 'warning' | 'danger';
   message: string;
+  advice: string;
 }
 
 export const conflictRules: ConflictRule[] = [
   {
-    ingredients: ['Retinol', 'Vitamin C'],
+    ingredients: ['retinol', 'vitamin-c'],
     severity: 'warning',
-    message: '视黄醇与高浓度维生素C同时使用可能引起刺激，建议早晚分开使用。',
+    message: '视黄醇与高浓度维生素 C 同时使用可能引起刺激',
+    advice: '建议早晚分开使用：早 C 晚 A',
   },
   {
-    ingredients: ['Retinol', 'Salicylic Acid'],
+    ingredients: ['retinol', 'salicylic-acid'],
     severity: 'danger',
-    message: '视黄醇与水杨酸同时使用可能导致过度去角质和皮肤屏障受损。',
+    message: '视黄醇与水杨酸同时使用可能导致过度去角质和屏障受损',
+    advice: '绝对不要同时使用，至少间隔 12 小时',
   },
   {
-    ingredients: ['Vitamin C', 'Salicylic Acid'],
+    ingredients: ['retinol', 'glycolic-acid'],
+    severity: 'danger',
+    message: '视黄醇与甘醇酸同时使用会过度刺激皮肤',
+    advice: '分天使用或选择更温和的杏仁酸',
+  },
+  {
+    ingredients: ['vitamin-c', 'salicylic-acid'],
+    severity: 'warning',
+    message: '维 C 与水杨酸同时使用可能降低维 C 效果并增加刺激',
+    advice: '敏感肌建议分开使用，健康肌肤可降低频率',
+  },
+  {
+    ingredients: ['niacinamide', 'vitamin-c'],
     severity: 'safe',
-    message: '可以搭配使用，但敏感肌肤建议降低频率。',
+    message: '烟酰胺与维 C 可以搭配使用',
+    advice: '传统说法认为会产生烟酸导致刺激，但现代研究表明可以安全搭配',
+  },
+  {
+    ingredients: ['retinol', 'bakuchiol'],
+    severity: 'safe',
+    message: '视黄醇与补骨脂酚可以搭配使用',
+    advice: '补骨脂酚能增强视黄醇效果同时降低刺激，是理想组合',
+  },
+  {
+    ingredients: ['salicylic-acid', 'glycolic-acid'],
+    severity: 'warning',
+    message: 'BHA 与 AHA 同时使用可能过度去角质',
+    advice: '新手建议只用一种，老手可交替使用',
+  },
+  {
+    ingredients: ['tranexamic-acid', 'kojic-acid'],
+    severity: 'safe',
+    message: '传明酸与曲酸可以搭配使用',
+    advice: '双重美白通路，效果更佳',
   },
 ];
+
+// ==================== 肤质测试 Mock 数据 ====================
+export interface SkinAnalysisResult {
+  skinType: 'dry' | 'oily' | 'combination' | 'sensitive' | 'normal';
+  skinTypeCn: string;
+  moisture: number;
+  oiliness: number;
+  sensitivity: number;
+  concerns: string[];
+  recommendedIngredients: string[];
+  recommendedProducts: string[];
+}
+
+export const mockSkinResults: Record<string, SkinAnalysisResult> = {
+  oily: {
+    skinType: 'oily',
+    skinTypeCn: '油性肌肤',
+    moisture: 45,
+    oiliness: 85,
+    sensitivity: 25,
+    concerns: ['出油旺盛', '毛孔粗大', '容易长痘'],
+    recommendedIngredients: ['niacinamide', 'salicylic-acid', 'zinc-pca'],
+    recommendedProducts: ['to-niacinamide', 'proya-double-anti'],
+  },
+  dry: {
+    skinType: 'dry',
+    skinTypeCn: '干性肌肤',
+    moisture: 25,
+    oiliness: 15,
+    sensitivity: 40,
+    concerns: ['干燥紧绷', '容易起皮', '细纹明显'],
+    recommendedIngredients: ['hyaluronic-acid', 'ceramides', 'squalane'],
+    recommendedProducts: ['bloomage-ha', 'cerave-pm'],
+  },
+  combination: {
+    skinType: 'combination',
+    skinTypeCn: '混合性肌肤',
+    moisture: 55,
+    oiliness: 70,
+    sensitivity: 30,
+    concerns: ['T 区出油', '两颊偏干', '毛孔粗大'],
+    recommendedIngredients: ['niacinamide', 'hyaluronic-acid', 'salicylic-acid'],
+    recommendedProducts: ['proya-double-anti', 'vichy-mineral'],
+  },
+  sensitive: {
+    skinType: 'sensitive',
+    skinTypeCn: '敏感性肌肤',
+    moisture: 40,
+    oiliness: 35,
+    sensitivity: 85,
+    concerns: ['容易泛红', '刺痛', '屏障受损'],
+    recommendedIngredients: ['ceramides', 'centella', 'madecassoside'],
+    recommendedProducts: ['winona-barrier', 'cerave-pm'],
+  },
+  normal: {
+    skinType: 'normal',
+    skinTypeCn: '中性肌肤',
+    moisture: 65,
+    oiliness: 45,
+    sensitivity: 15,
+    concerns: ['维持现状', '预防衰老'],
+    recommendedIngredients: ['vitamin-c', 'retinol', 'peptides'],
+    recommendedProducts: ['skinceuticals-ce', 'proya-ruby'],
+  },
+};
+
+// ==================== 辅助函数 ====================
+export function getBrandById(id: string): Brand | undefined {
+  return brands.find(b => b.id === id);
+}
+
+export function getProductById(id: string): Product | undefined {
+  return products.find(p => p.id === id);
+}
+
+export function getProductsByBrand(brandId: string): Product[] {
+  return products.filter(p => p.brandId === brandId);
+}
+
+export function getIngredientById(id: string): Ingredient | undefined {
+  return ingredients.find(i => i.id === id);
+}
+
+export function checkConflicts(ingredientIds: string[]): ConflictRule[] {
+  return conflictRules.filter(rule =>
+    rule.ingredients.every(ing => ingredientIds.includes(ing))
+  );
+}
+
+export function getRecommendedProducts(skinType: string): Product[] {
+  const result = mockSkinResults[skinType as keyof typeof mockSkinResults];
+  if (!result) return [];
+  return result.recommendedProducts
+    .map(id => getProductById(id))
+    .filter(Boolean) as Product[];
+}
