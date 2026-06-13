@@ -1,0 +1,176 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Camera, FlaskConical, ShoppingCart, ShieldCheck, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+
+const features = [
+  {
+    icon: Camera,
+    title: 'AI 肤质测试',
+    description: '上传自拍，AI 智能分析你的肤质类型，获取个性化护肤建议。',
+    href: '/skin-test',
+    gradient: 'from-blue-500/20 to-cyan-500/20',
+  },
+  {
+    icon: FlaskConical,
+    title: '成分深度分析',
+    description: '查询护肤品成分，查看安全评分、功效说明和化学结构。',
+    href: '/ingredients',
+    gradient: 'from-purple-500/20 to-pink-500/20',
+  },
+  {
+    icon: ShoppingCart,
+    title: '智能产品推荐',
+    description: '基于你的肤质和需求，推荐最适合的护肤产品组合。',
+    href: '/products',
+    gradient: 'from-amber-500/20 to-orange-500/20',
+  },
+  {
+    icon: ShieldCheck,
+    title: '成分冲突检测',
+    description: '自动检测成分搭配冲突，避免护肤不当造成的皮肤问题。',
+    href: '/ingredients',
+    gradient: 'from-emerald-500/20 to-teal-500/20',
+  },
+];
+
+export function HeroSection() {
+  return (
+    <section className="relative overflow-hidden">
+      {/* Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 rounded-full blur-[120px]" />
+
+      <div className="container-app relative pt-20 pb-16 sm:pt-32 sm:pb-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+            </span>
+            AI 驱动 · 科学护肤
+          </motion.div>
+
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+            <span className="text-white">科学护肤，</span>
+            <br />
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              从了解成分开始
+            </span>
+          </h1>
+
+          <p className="text-lg sm:text-xl text-muted max-w-xl mx-auto mb-10 leading-relaxed">
+            SkinSight 使用 AI 技术分析你的肤质，深度解读护肤成分，
+            为你找到真正适合的护肤方案。
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/skin-test" className="btn-primary gap-3 px-8 py-3 text-base">
+              开始肤质测试
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link href="/ingredients" className="btn-secondary gap-3 px-8 py-3 text-base">
+              查询成分
+              <FlaskConical className="w-4 h-4" />
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+export function FeaturesSection() {
+  return (
+    <section className="py-16 sm:py-24">
+      <div className="container-app">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3">
+            四大核心功能
+          </h2>
+          <p className="text-muted max-w-md mx-auto">
+            从肤质检测到产品推荐，一站式解决你的护肤困惑
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-4xl mx-auto">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
+            >
+              <Link href={feature.href}>
+                <div className="card group h-full">
+                  <div
+                    className={`w-10 h-10 rounded-lg bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-4`}
+                  >
+                    <feature.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-base font-semibold mb-2 group-hover:text-primary transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-muted leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function StatsSection() {
+  const stats = [
+    { value: '5000+', label: '已收录成分' },
+    { value: '98%', label: '安全评分准确率' },
+    { value: '10万+', label: '肤质测试次数' },
+    { value: '4.9', label: '用户满意度' },
+  ];
+
+  return (
+    <section className="py-12 border-y border-border">
+      <div className="container-app">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center"
+            >
+              <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-1">
+                {stat.value}
+              </div>
+              <div className="text-sm text-muted">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
