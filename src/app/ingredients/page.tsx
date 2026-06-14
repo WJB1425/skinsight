@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Filter, FlaskConical } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Filter, FlaskConical, ChevronDown } from 'lucide-react';
 import { IngredientCard } from '@/components/ingredient-card';
 import { IngredientDetail } from '@/components/ingredient-detail';
 import { ConflictAlert } from '@/components/conflict-alert';
@@ -14,6 +14,7 @@ export default function IngredientsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [activeConflicts] = useState(conflictRules);
+  const [conflictsOpen, setConflictsOpen] = useState(true);
 
   const categories = useMemo(() => {
     const cats = new Set(ingredients.map((i) => i.category));
@@ -48,20 +49,50 @@ export default function IngredientsPage() {
         </p>
       </motion.div>
 
-      {/* Conflict Alerts */}
+      {/* Conflict Alerts — collapsible */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="max-w-2xl mx-auto mb-8 space-y-3"
+        className="max-w-2xl mx-auto mb-8"
       >
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <Filter className="w-4 h-4 text-muted" />
-          常见成分冲突提醒
-        </h3>
-        {activeConflicts.map((rule, i) => (
-          <ConflictAlert key={i} {...rule} />
-        ))}
+        <button
+          type="button"
+          onClick={() => setConflictsOpen((v) => !v)}
+          aria-expanded={conflictsOpen}
+          className="group flex w-full items-center justify-between gap-2 py-1 text-left"
+        >
+          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Filter className="w-4 h-4 text-muted" />
+            常见成分冲突提醒
+            <span className="badge bg-surface-hover text-muted border border-border">
+              {activeConflicts.length}
+            </span>
+          </h3>
+          <ChevronDown
+            className={`w-4 h-4 text-muted transition-transform duration-300 group-hover:text-foreground ${
+              conflictsOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+        <AnimatePresence initial={false}>
+          {conflictsOpen && (
+            <motion.div
+              key="conflict-list"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-3 pt-3">
+                {activeConflicts.map((rule, i) => (
+                  <ConflictAlert key={i} {...rule} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Search & Filter */}
