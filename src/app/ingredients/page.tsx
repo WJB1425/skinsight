@@ -8,17 +8,23 @@ import { IngredientDetail } from '@/components/ingredient-detail';
 import { ConflictAlert } from '@/components/conflict-alert';
 import { ingredients, conflictRules } from '@/lib/mock-data';
 import type { Ingredient } from '@/lib/mock-data';
+import { INGREDIENT_GROUPS, getCategoryGroup } from '@/lib/categories';
 
 export default function IngredientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [activeConflicts] = useState(conflictRules);
   const [conflictsOpen, setConflictsOpen] = useState(true);
 
-  const categories = useMemo(() => {
-    const cats = new Set(ingredients.map((i) => i.category));
-    return ['all', ...Array.from(cats)];
+  // Collapse the 30+ granular categories into the high-level groups that
+  // actually have ingredients (skip empty ones so there are no dead chips).
+  const groups = useMemo(() => {
+    const present = new Set(ingredients.map((i) => getCategoryGroup(i.category)));
+    return [
+      { id: 'all', label: '全部' },
+      ...INGREDIENT_GROUPS.filter((g) => present.has(g.id)),
+    ];
   }, []);
 
   const filteredIngredients = useMemo(() => {
@@ -26,11 +32,11 @@ export default function IngredientsPage() {
       const matchesSearch =
         ing.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ing.nameCn.includes(searchQuery);
-      const matchesCategory =
-        selectedCategory === 'all' || ing.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+      const matchesGroup =
+        selectedGroup === 'all' || getCategoryGroup(ing.category) === selectedGroup;
+      return matchesSearch && matchesGroup;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedGroup]);
 
   return (
     <div className="container-app py-8 sm:py-12">
@@ -113,15 +119,15 @@ export default function IngredientsPage() {
           />
         </div>
 
-        {/* Category Filter */}
+        {/* Category Filter — grouped into high-level functions */}
         <div className="flex flex-wrap gap-2 mt-4">
-          {categories.map((cat) => (
+          {groups.map((g) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`chip ${selectedCategory === cat ? 'chip-active' : 'chip-idle'}`}
+              key={g.id}
+              onClick={() => setSelectedGroup(g.id)}
+              className={`chip ${selectedGroup === g.id ? 'chip-active' : 'chip-idle'}`}
             >
-              {cat === 'all' ? '全部' : cat}
+              {g.label}
             </button>
           ))}
         </div>
