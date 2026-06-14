@@ -99,10 +99,10 @@ export function ImageUpload({ onImageSelect, maxFiles = 1 }: ImageUploadProps) {
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
               className={cn(
-                'relative flex flex-col items-center justify-center gap-4 p-10 rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200',
+                'relative flex flex-col items-center justify-center gap-4 p-10 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200',
                 isDragging
                   ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-border-hover hover:bg-surface-hover'
+                  : 'border-border hover:border-primary/40 hover:bg-surface-hover'
               )}
             >
               <input
@@ -122,14 +122,14 @@ export function ImageUpload({ onImageSelect, maxFiles = 1 }: ImageUploadProps) {
                 <>
                   <div
                     className={cn(
-                      'w-12 h-12 rounded-xl flex items-center justify-center transition-colors duration-200',
-                      isDragging ? 'bg-primary/20' : 'bg-surface'
+                      'w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-200',
+                      isDragging ? 'bg-primary/20 text-primary' : 'bg-surface-hover text-muted'
                     )}
                   >
-                    <Upload className="w-5 h-5 text-muted" />
+                    <Upload className="w-5 h-5" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-foreground">
                       {isDragging ? '释放以上传' : '点击或拖拽上传图片'}
                     </p>
                     <p className="text-xs text-muted mt-1">支持 JPG、PNG、WebP 格式</p>

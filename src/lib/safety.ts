@@ -15,12 +15,12 @@ export interface SafetyConfig {
 /** Map a 0–10 safety score to its presentation config. Thresholds: >=8 安全, >=5 注意, else 风险. */
 export function getSafetyLevel(score: number): SafetyConfig {
   if (score >= 8) {
-    return { level: 'safe', label: '安全', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', badgeClass: 'badge-safe' };
+    return { level: 'safe', label: '安全', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', badgeClass: 'badge-safe' };
   }
   if (score >= 5) {
-    return { level: 'caution', label: '注意', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', badgeClass: 'badge-warning' };
+    return { level: 'caution', label: '注意', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', badgeClass: 'badge-warning' };
   }
-  return { level: 'risk', label: '风险', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', badgeClass: 'badge-danger' };
+  return { level: 'risk', label: '风险', color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', badgeClass: 'badge-danger' };
 }
 
 export type IrritationRisk = 'low' | 'medium' | 'high';

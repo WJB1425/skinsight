@@ -39,10 +39,10 @@ export default function IngredientsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-10"
       >
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 mb-4">
-          <FlaskConical className="w-6 h-6 text-purple-400" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 ring-1 ring-inset ring-border shadow-soft mb-4">
+          <FlaskConical className="w-7 h-7 text-violet-600" />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">成分分析</h1>
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">成分分析</h1>
         <p className="text-muted max-w-md mx-auto">
           查询护肤品成分的安全性和功效，做出更明智的护肤选择
         </p>
@@ -55,7 +55,7 @@ export default function IngredientsPage() {
         transition={{ delay: 0.2 }}
         className="max-w-2xl mx-auto mb-8 space-y-3"
       >
-        <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted" />
           常见成分冲突提醒
         </h3>
@@ -88,11 +88,7 @@ export default function IngredientsPage() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
-                selectedCategory === cat
-                  ? 'bg-primary text-white'
-                  : 'bg-surface text-muted border border-border hover:border-border-hover hover:text-white'
-              }`}
+              className={`chip ${selectedCategory === cat ? 'chip-active' : 'chip-idle'}`}
             >
               {cat === 'all' ? '全部' : cat}
             </button>
@@ -103,7 +99,7 @@ export default function IngredientsPage() {
       {/* Results Count */}
       <div className="max-w-5xl mx-auto mb-4">
         <p className="text-sm text-muted">
-          找到 <span className="text-white font-medium">{filteredIngredients.length}</span> 个成分
+          找到 <span className="text-foreground font-semibold">{filteredIngredients.length}</span> 个成分
         </p>
       </div>
 

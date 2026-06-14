@@ -31,11 +31,12 @@ export function IngredientCard({ ingredient, index = 0 }: IngredientCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
+      whileHover={{ y: -4 }}
       className="card group cursor-pointer"
     >
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h3 className="text-base font-semibold text-white group-hover:text-primary transition-colors">
+          <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
             {ingredient.nameCn}
           </h3>
           <p className="text-xs text-muted mt-0.5">{ingredient.name}</p>
@@ -44,11 +45,11 @@ export function IngredientCard({ ingredient, index = 0 }: IngredientCardProps) {
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-3">
-        <span className="badge bg-white/5 text-muted border border-border">
+        <span className="badge bg-surface-hover text-muted border border-border">
           {ingredient.category}
         </span>
         {ingredient.functions.map((tag, i) => (
-          <span key={i} className="badge bg-primary/10 text-primary/80 border border-primary/20">
+          <span key={i} className="badge bg-primary/10 text-primary border border-primary/20">
             {tag}
           </span>
         ))}

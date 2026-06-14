@@ -21,20 +21,21 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
+      whileHover={{ y: -4 }}
       className="card group cursor-pointer overflow-hidden"
     >
       {/* Product Image Placeholder */}
-      <div className="relative aspect-square bg-surface-hover rounded-lg mb-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-          <Droplets className="w-10 h-10 text-muted/30" />
+      <div className="relative aspect-square bg-surface-hover rounded-xl mb-4 overflow-hidden ring-1 ring-inset ring-border">
+        <div className="absolute inset-0 bg-gradient-to-br from-sky-100/70 via-indigo-50/60 to-violet-100/60 flex items-center justify-center">
+          <Droplets className="w-10 h-10 text-primary/30" />
         </div>
         <div className="absolute top-2 left-2">
-          <span className="badge bg-surface-hover/80 text-white/90 border border-white/10 backdrop-blur-sm text-[10px]">
+          <span className="badge bg-white/80 text-foreground border border-border backdrop-blur-md text-[10px] shadow-soft">
             {brand?.nameCn || product.brandId}
           </span>
         </div>
         <div className="absolute top-2 right-2">
-          <span className="badge bg-white/10 text-white border border-white/10 backdrop-blur-sm">
+          <span className="badge bg-white/80 text-foreground border border-border backdrop-blur-md shadow-soft">
             {product.category}
           </span>
         </div>
@@ -43,7 +44,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       {/* Info */}
       <div className="flex items-start justify-between mb-2">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-white truncate group-hover:text-primary transition-colors">
+          <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
             {product.nameCn}
           </h3>
           <p className="text-xs text-muted">{product.name}</p>
@@ -62,14 +63,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       </p>
 
       <div className="flex items-center justify-between">
-        <span className="text-base font-semibold text-white">
+        <span className="text-base font-semibold text-foreground">
           ¥{product.price}
         </span>
         <div className="flex gap-1">
           {product.keyIngredients.slice(0, 2).map((ing, i) => (
             <span
               key={i}
-              className="badge bg-surface-hover text-muted text-[10px]"
+              className="badge bg-surface-hover text-muted text-[10px] border border-border"
             >
               {ing}
             </span>

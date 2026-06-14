@@ -33,10 +33,10 @@ export default function SkinTestPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-10"
       >
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-4">
-          <Camera className="w-6 h-6 text-primary" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-sky-500/15 to-blue-500/15 ring-1 ring-inset ring-border shadow-soft mb-4">
+          <Camera className="w-7 h-7 text-sky-600" />
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">AI 肤质测试</h1>
+        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">AI 肤质测试</h1>
         <p className="text-muted max-w-md mx-auto">
           上传你的面部照片，AI 将智能分析你的肤质类型并给出个性化建议
         </p>
@@ -50,8 +50,8 @@ export default function SkinTestPage() {
           transition={{ delay: 0.2 }}
         >
           <div className="card">
-            <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center font-bold">1</span>
+            <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-primary/15 text-primary text-xs flex items-center justify-center font-bold">1</span>
               上传照片
             </h2>
             <ImageUpload onImageSelect={handleImageSelect} />
@@ -78,8 +78,8 @@ export default function SkinTestPage() {
             )}
 
             {/* Tips */}
-            <div className="mt-6 p-4 rounded-lg bg-surface-hover">
-              <h3 className="text-xs font-semibold text-white mb-2">拍摄提示</h3>
+            <div className="mt-6 p-4 rounded-xl bg-surface-hover border border-border">
+              <h3 className="text-xs font-semibold text-foreground mb-2">拍摄提示</h3>
               <ul className="text-xs text-muted space-y-1">
                 <li>• 在自然光下拍摄效果最佳</li>
                 <li>• 保持面部清洁，不要化妆</li>
@@ -100,10 +100,10 @@ export default function SkinTestPage() {
             <AnalysisResult result={mockSkinResults.combination} />
           ) : (
             <div className="card flex flex-col items-center justify-center min-h-[400px] text-center">
-              <div className="w-16 h-16 rounded-2xl bg-surface-hover flex items-center justify-center mb-4">
-                <Sparkles className="w-8 h-8 text-muted/30" />
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-sky-500/10 to-violet-500/10 ring-1 ring-inset ring-border flex items-center justify-center mb-4">
+                <Sparkles className="w-8 h-8 text-primary/40" />
               </div>
-              <h3 className="text-base font-semibold text-white mb-2">
+              <h3 className="text-base font-semibold text-foreground mb-2">
                 等待分析
               </h3>
               <p className="text-sm text-muted max-w-xs">

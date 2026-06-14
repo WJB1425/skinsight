@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 10 10 10;
-    --foreground: 255 255 255;
+    --background: 251 251 253;
+    --foreground: 29 29 31;
   }
 
   * {
@@ -14,22 +14,36 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  body {
-    @apply bg-background text-white;
+  html {
+    scroll-behavior: smooth;
   }
 
-  /* Custom scrollbar */
+  body {
+    @apply bg-background text-foreground;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgba(0, 113, 227, 0.16);
+  }
+
+  /* Custom scrollbar — light, unobtrusive */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 11px;
+    height: 11px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-background;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-dark rounded-full;
+    background-color: #d2d2d7;
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted;
+    background-color: #b8b8c0;
+    background-clip: padding-box;
   }
 }
 
@@ -38,47 +52,69 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* Brand gradient — blue → indigo → violet. Premium, AI-forward. */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary via-indigo-500 to-accent bg-clip-text text-transparent;
+  }
+
+  /* Frosted glass — used on nav and floating bars over content */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl backdrop-saturate-150;
+  }
+
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg 
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full
            bg-primary text-white font-medium text-sm
-           hover:bg-primary-hover transition-all duration-200
-           disabled:opacity-50 disabled:cursor-not-allowed
-           active:scale-[0.98];
+           shadow-[0_4px_16px_-4px_rgba(0,113,227,0.5)]
+           hover:bg-primary-hover hover:shadow-[0_10px_28px_-6px_rgba(0,113,227,0.6)]
+           transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+           active:scale-[0.97];
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg
-           bg-surface text-white font-medium text-sm border border-border
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full
+           bg-white text-foreground font-medium text-sm border border-border shadow-soft
            hover:bg-surface-hover hover:border-border-hover transition-all duration-200
            disabled:opacity-50 disabled:cursor-not-allowed
-           active:scale-[0.98];
+           active:scale-[0.97];
   }
 
   .card {
-    @apply bg-surface border border-border rounded-lg p-5
-           hover:border-border-hover transition-colors duration-200;
+    @apply bg-surface border border-border rounded-2xl p-5 shadow-card
+           hover:shadow-card-hover hover:border-border-hover
+           transition-all duration-300;
   }
 
   .input-base {
-    @apply w-full px-4 py-2.5 bg-surface border border-border rounded-lg
-           text-white placeholder-muted text-sm
-           focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20
+    @apply w-full px-4 py-2.5 bg-white border border-border rounded-xl shadow-soft
+           text-foreground placeholder-muted text-sm
+           focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10
            transition-all duration-200;
+  }
+
+  /* Filter pill / segmented chip */
+  .chip {
+    @apply inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-medium
+           border transition-all duration-200;
+  }
+  .chip-active {
+    @apply bg-primary text-white border-primary shadow-[0_2px_12px_-2px_rgba(0,113,227,0.5)];
+  }
+  .chip-idle {
+    @apply bg-white text-muted border-border hover:border-border-hover hover:text-foreground;
   }
 
   .badge {
     @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
   }
-
   .badge-safe {
-    @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200/80;
   }
-
   .badge-warning {
-    @apply bg-amber-500/10 text-amber-400 border border-amber-500/20;
+    @apply bg-amber-50 text-amber-700 border border-amber-200/80;
   }
-
   .badge-danger {
-    @apply bg-red-500/10 text-red-400 border border-red-500/20;
+    @apply bg-red-50 text-red-600 border border-red-200/80;
   }
 }

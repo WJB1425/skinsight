@@ -39,7 +39,7 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-md"
         onClick={onClose}
       >
         <motion.div
@@ -47,17 +47,17 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-lg bg-surface border border-border rounded-xl overflow-hidden flex flex-col max-h-[90vh]"
+          className="w-full max-w-lg bg-surface border border-border rounded-3xl overflow-hidden flex flex-col max-h-[90vh] shadow-card-hover"
         >
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
             <div>
-              <h2 className="text-lg font-bold text-white">{ingredient.nameCn}</h2>
+              <h2 className="text-lg font-bold text-foreground">{ingredient.nameCn}</h2>
               <p className="text-xs text-muted">{ingredient.name}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+              className="p-2 rounded-full hover:bg-surface-hover transition-colors"
             >
               <X className="w-4 h-4 text-muted" />
             </button>
@@ -73,7 +73,7 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
                 <div>
                   <p className="text-sm text-muted">安全评分</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-white">{ingredient.safetyScore}</span>
+                    <span className="text-2xl font-bold text-foreground">{ingredient.safetyScore}</span>
                     <span className="text-sm text-muted">/ 10</span>
                     <span className={cn('badge', safety.bg, safety.color, safety.border)}>
                       {safety.label}
@@ -88,7 +88,7 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
 
             {/* Safety hints — surfaced from real data fields */}
             <div>
-              <h4 className="text-sm font-semibold text-white mb-2">安全提示</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-2">安全提示</h4>
               <div className="flex flex-wrap gap-2">
                 <span className={cn('badge', irritation.badgeClass)}>{irritation.label}</span>
                 <span className={cn('badge', pregnancy.badgeClass)}>{pregnancy.label}</span>
@@ -97,7 +97,7 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
 
             {/* Category & Tags */}
             <div className="flex flex-wrap gap-2">
-              <span className="badge bg-white/5 text-muted border border-border">
+              <span className="badge bg-surface-hover text-muted border border-border">
                 {ingredient.category}
               </span>
               {ingredient.functions.map((tag, i) => (
@@ -109,19 +109,19 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
 
             {/* Description */}
             <div>
-              <h4 className="text-sm font-semibold text-white mb-2">成分说明</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-2">成分说明</h4>
               <p className="text-sm text-muted leading-relaxed">{ingredient.description}</p>
             </div>
 
             {/* Chemical Structure */}
             <div>
-              <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
                 <Atom className="w-4 h-4 text-accent" />
                 化学结构
               </h4>
               <MoleculeViewer smiles={ingredient.smiles} name={ingredient.nameCn} />
               {ingredient.formula && (
-                <p className="mt-2 text-sm text-white">
+                <p className="mt-2 text-sm text-foreground">
                   分子式：<span className="font-mono"><FormulaText formula={ingredient.formula} /></span>
                 </p>
               )}

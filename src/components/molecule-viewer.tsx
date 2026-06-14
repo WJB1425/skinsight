@@ -3,21 +3,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { Atom, AlertTriangle } from 'lucide-react';
 
-// Atom colors tuned for the dark (#1a1a1a) surface so heteroatoms read clearly.
+// Atom colors tuned for the light (#f5f5f7) surface so heteroatoms read clearly.
 const MOLECULE_THEME = {
-  FOREGROUND: '#e5e7eb',
-  BACKGROUND: '#1a1a1a',
-  C: '#e5e7eb', // carbon — light gray (skeletal lines)
-  N: '#60a5fa', // blue-400
-  O: '#f87171', // red-400
-  S: '#fbbf24', // amber-400
-  P: '#fb923c', // orange-400
-  SI: '#a78bfa', // violet-400 — silicones are everywhere in cosmetics
-  F: '#34d399', // emerald-400
-  CL: '#2dd4bf', // teal-400
-  BR: '#fb923c',
-  I: '#c084fc', // purple-400
-  B: '#fbbf24',
+  FOREGROUND: '#1d1d1f',
+  BACKGROUND: '#f5f5f7',
+  C: '#1d1d1f', // carbon — near-black (skeletal lines)
+  N: '#2563eb', // blue-600
+  O: '#dc2626', // red-600
+  S: '#d97706', // amber-600
+  P: '#ea580c', // orange-600
+  SI: '#7c3aed', // violet-600 — silicones are everywhere in cosmetics
+  F: '#059669', // emerald-600
+  CL: '#0d9488', // teal-600
+  BR: '#ea580c',
+  I: '#9333ea', // purple-600
+  B: '#d97706',
   H: '#9ca3af', // gray-400
 };
 
@@ -81,7 +81,7 @@ export function MoleculeViewer({ smiles, name }: MoleculeViewerProps) {
   }, [smiles]);
 
   return (
-    <div className="relative w-full h-56 sm:h-64 bg-surface-hover rounded-lg border border-border overflow-hidden flex items-center justify-center">
+    <div className="relative w-full h-56 sm:h-64 bg-surface-hover rounded-xl border border-border overflow-hidden flex items-center justify-center">
       {/* Kept mounted so the ref exists at draw time; faded in once drawn. */}
       <svg
         ref={svgRef}
@@ -110,7 +110,7 @@ export function MoleculeViewer({ smiles, name }: MoleculeViewerProps) {
 
       {status === 'error' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center px-6">
-          <AlertTriangle className="w-6 h-6 text-amber-400/60" />
+          <AlertTriangle className="w-6 h-6 text-amber-500/70" />
           <span className="text-xs text-muted leading-relaxed">结构图暂时无法生成</span>
         </div>
       )}

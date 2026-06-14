@@ -21,8 +21,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" className="dark">
-      <body className={`${inter.variable} font-sans bg-background text-white min-h-screen`}>
+    <html lang="zh-CN">
+      <body className={`${inter.variable} font-sans bg-background text-foreground min-h-screen antialiased`}>
+        {/* Ambient tech gradient — soft, fixed behind all content */}
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-sky-50 via-background to-background" />
+          <div className="absolute -top-40 left-1/4 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-indigo-200/30 blur-[150px]" />
+          <div className="absolute top-10 right-0 h-[32rem] w-[32rem] translate-x-1/3 rounded-full bg-violet-200/25 blur-[150px]" />
+        </div>
         <Navbar />
         <main className="min-h-[calc(100vh-64px)]">
           {children}
