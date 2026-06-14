@@ -271,9 +271,9 @@ export const ingredients: Ingredient[] = [
     safetyScore: 9,
     category: '植物抗老',
     functions: ['抗衰老', '抗氧化', '抗炎', '温和'],
-    description: '从补骨脂中提取的植物成分，作用机制类似视黄醇但更温和。能激活胶原蛋白生成，改善细纹，且无光敏性，孕妇可用。',
+    description: '从补骨脂中提取的植物成分，作用机制类似视黄醇但更温和。能激活胶原蛋白生成，改善细纹，且无光敏性。但因作用机制类似视黄醇且缺乏孕期安全数据，孕期建议谨慎或避免。',
     irritationRisk: 'low',
-    pregnantSafe: true,
+    pregnantSafe: false,
   },
   {
     id: 'peptides',
