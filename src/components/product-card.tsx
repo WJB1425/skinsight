@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Star, Droplets } from 'lucide-react';
+import { FlaskConical, Droplets } from 'lucide-react';
 import type { Product } from '@/lib/mock-data';
-import { getBrandById } from '@/lib/mock-data';
+import { getBrandById, getIngredientById } from '@/lib/mock-data';
 
 interface ProductCardProps {
   product: Product;
@@ -12,6 +12,9 @@ interface ProductCardProps {
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const brand = getBrandById(product.brandId);
+  // A real, checkable signal instead of a fabricated star rating: how many of
+  // this product's key ingredients we actually have analyzed in the database.
+  const analyzedCount = product.keyIngredients.filter((id) => getIngredientById(id)).length;
 
   return (
     <motion.div
@@ -45,9 +48,12 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </h3>
           <p className="text-xs text-muted">{product.name}</p>
         </div>
-        <div className="flex items-center gap-1 text-amber-400 flex-shrink-0">
-          <Star className="w-3.5 h-3.5 fill-current" />
-          <span className="text-xs font-medium">{product.rating}</span>
+        <div
+          className="flex items-center gap-1 text-muted flex-shrink-0"
+          title="该产品已收录分析的核心成分数量"
+        >
+          <FlaskConical className="w-3.5 h-3.5" />
+          <span className="text-xs font-medium">{analyzedCount} 种成分</span>
         </div>
       </div>
 

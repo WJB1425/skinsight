@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getSafetyLevel } from '@/lib/safety';
 import type { Ingredient } from '@/lib/mock-data';
 
 interface IngredientCardProps {
@@ -10,18 +11,14 @@ interface IngredientCardProps {
   index?: number;
 }
 
-function SafetyBadge({ score }: { score: number }) {
-  const config =
-    score >= 8
-      ? { icon: ShieldCheck, className: 'badge-safe', label: '安全' }
-      : score >= 5
-        ? { icon: Shield, className: 'badge-warning', label: '注意' }
-        : { icon: ShieldAlert, className: 'badge-danger', label: '风险' };
+const SAFETY_ICON = { safe: ShieldCheck, caution: Shield, risk: ShieldAlert };
 
-  const Icon = config.icon;
+function SafetyBadge({ score }: { score: number }) {
+  const config = getSafetyLevel(score);
+  const Icon = SAFETY_ICON[config.level];
 
   return (
-    <span className={cn('badge', config.className)}>
+    <span className={cn('badge', config.badgeClass)}>
       <Icon className="w-3 h-3 mr-1" />
       {config.label} {score}/10
     </span>

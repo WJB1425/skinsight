@@ -3,7 +3,10 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert, X, Atom } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getSafetyLevel, getIrritationConfig, getPregnancyConfig } from '@/lib/safety';
 import { MoleculeViewer } from '@/components/molecule-viewer';
+import { DataSource } from '@/components/data-source';
+import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 import type { Ingredient } from '@/lib/mock-data';
 
 interface IngredientDetailProps {
@@ -11,15 +14,24 @@ interface IngredientDetailProps {
   onClose: () => void;
 }
 
-export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps) {
-  const getSafetyConfig = (score: number) => {
-    if (score >= 8) return { icon: ShieldCheck, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', label: '安全' };
-    if (score >= 5) return { icon: Shield, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', label: '注意' };
-    return { icon: ShieldAlert, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', label: '风险' };
-  };
+const SAFETY_ICON = { safe: ShieldCheck, caution: Shield, risk: ShieldAlert };
 
-  const safety = getSafetyConfig(ingredient.safetyScore);
-  const SafetyIcon = safety.icon;
+/** Render a molecular formula with subscript digits, e.g. C6H6N2O -> C₆H₆N₂O. */
+function FormulaText({ formula }: { formula: string }) {
+  return (
+    <>
+      {formula.split(/(\d+)/).map((part, i) =>
+        /^\d+$/.test(part) ? <sub key={i}>{part}</sub> : <span key={i}>{part}</span>,
+      )}
+    </>
+  );
+}
+
+export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps) {
+  const safety = getSafetyLevel(ingredient.safetyScore);
+  const SafetyIcon = SAFETY_ICON[safety.level];
+  const irritation = getIrritationConfig(ingredient.irritationRisk);
+  const pregnancy = getPregnancyConfig(ingredient.pregnantSafe);
 
   return (
     <AnimatePresence>
@@ -35,10 +47,10 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-lg bg-surface border border-border rounded-xl overflow-hidden"
+          className="w-full max-w-lg bg-surface border border-border rounded-xl overflow-hidden flex flex-col max-h-[90vh]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-border">
+          <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
             <div>
               <h2 className="text-lg font-bold text-white">{ingredient.nameCn}</h2>
               <p className="text-xs text-muted">{ingredient.name}</p>
@@ -51,36 +63,48 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
             </button>
           </div>
 
-          <div className="p-5 space-y-5">
+          <div className="p-5 space-y-5 overflow-y-auto">
             {/* Safety Score */}
-            <div className="flex items-center gap-4">
-              <div className={cn('w-14 h-14 rounded-xl flex items-center justify-center', safety.bg, safety.border, 'border')}>
-                <SafetyIcon className={cn('w-6 h-6', safety.color)} />
-              </div>
-              <div>
-                <p className="text-sm text-muted">安全评分</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-white">{ingredient.safetyScore}</span>
-                  <span className="text-sm text-muted">/ 10</span>
-                  <span className={cn('badge', safety.bg, safety.color, safety.border)}>
-                    {safety.label}
-                  </span>
+            <div>
+              <div className="flex items-center gap-4">
+                <div className={cn('w-14 h-14 rounded-xl flex items-center justify-center border', safety.bg, safety.border)}>
+                  <SafetyIcon className={cn('w-6 h-6', safety.color)} />
                 </div>
+                <div>
+                  <p className="text-sm text-muted">安全评分</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-white">{ingredient.safetyScore}</span>
+                    <span className="text-sm text-muted">/ 10</span>
+                    <span className={cn('badge', safety.bg, safety.color, safety.border)}>
+                      {safety.label}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-dark mt-2">
+                综合参考分级，非官方或监管评级，仅供科普参考。
+              </p>
+            </div>
+
+            {/* Safety hints — surfaced from real data fields */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-2">安全提示</h4>
+              <div className="flex flex-wrap gap-2">
+                <span className={cn('badge', irritation.badgeClass)}>{irritation.label}</span>
+                <span className={cn('badge', pregnancy.badgeClass)}>{pregnancy.label}</span>
               </div>
             </div>
 
             {/* Category & Tags */}
-            <div>
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className="badge bg-white/5 text-muted border border-border">
-                  {ingredient.category}
+            <div className="flex flex-wrap gap-2">
+              <span className="badge bg-white/5 text-muted border border-border">
+                {ingredient.category}
+              </span>
+              {ingredient.functions.map((tag, i) => (
+                <span key={i} className="badge bg-primary/10 text-primary border border-primary/20">
+                  {tag}
                 </span>
-                {ingredient.functions.map((tag, i) => (
-                  <span key={i} className="badge bg-primary/10 text-primary border border-primary/20">
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              ))}
             </div>
 
             {/* Description */}
@@ -96,12 +120,23 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
                 化学结构
               </h4>
               <MoleculeViewer smiles={ingredient.smiles} name={ingredient.nameCn} />
+              {ingredient.formula && (
+                <p className="mt-2 text-sm text-white">
+                  分子式：<span className="font-mono"><FormulaText formula={ingredient.formula} /></span>
+                </p>
+              )}
               {ingredient.smiles && (
-                <p className="mt-2 font-mono text-[11px] text-muted-dark break-all leading-relaxed">
+                <p className="mt-1 font-mono text-[11px] text-muted-dark break-all leading-relaxed">
                   SMILES: {ingredient.smiles}
                 </p>
               )}
             </div>
+
+            {/* Data source / methodology disclosure */}
+            <DataSource />
+
+            {/* Disclaimer */}
+            <MedicalDisclaimer />
           </div>
         </motion.div>
       </motion.div>

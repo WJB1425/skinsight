@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Camera, FlaskConical, ShoppingCart, ShieldCheck, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { ingredients, brands, conflictRules } from '@/lib/mock-data';
 
 const features = [
   {
@@ -143,11 +144,14 @@ export function FeaturesSection() {
 }
 
 export function StatsSection() {
+  // Counts computed from the actual dataset, so the numbers can never overstate
+  // what the app really contains.
+  const structureCount = ingredients.filter((i) => i.smiles && i.smiles.trim()).length;
   const stats = [
-    { value: '5000+', label: '已收录成分' },
-    { value: '98%', label: '安全评分准确率' },
-    { value: '10万+', label: '肤质测试次数' },
-    { value: '4.9', label: '用户满意度' },
+    { value: String(ingredients.length), label: '精选成分' },
+    { value: String(structureCount), label: '真实化学结构图' },
+    { value: String(brands.length), label: '收录品牌' },
+    { value: String(conflictRules.length), label: '成分冲突规则' },
   ];
 
   return (
@@ -170,6 +174,9 @@ export function StatsSection() {
             </motion.div>
           ))}
         </div>
+        <p className="text-center text-xs text-muted-dark mt-6">
+          数据基于精选成分库，持续扩充中 · 化学结构经程序校验
+        </p>
       </div>
     </section>
   );

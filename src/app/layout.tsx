@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Navbar } from '@/components/navbar';
+import { Footer } from '@/components/footer';
 import './globals.css';
 
 const inter = Inter({
@@ -26,6 +27,7 @@ export default function RootLayout({
         <main className="min-h-[calc(100vh-64px)]">
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   );
