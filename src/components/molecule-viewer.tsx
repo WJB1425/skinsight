@@ -119,10 +119,14 @@ export function MoleculeViewer({ smiles, name }: MoleculeViewerProps) {
   );
 }
 
+// Same atom palette, but a transparent canvas so the structure sits directly
+// on the card (the design draws the thumbnail with no background block).
+const THUMB_THEME = { ...MOLECULE_THEME, BACKGROUND: 'transparent' };
+
 /**
- * Compact 2D structure thumbnail for list cards. Same browser-side render as
- * MoleculeViewer but in a small fixed box; renders nothing when there is no
- * parsable SMILES (mixtures/extracts) so cards stay clean.
+ * Compact 2D structure thumbnail for list cards — drawn directly on the card
+ * surface (no background block, matching the design). Renders nothing when
+ * there is no parsable SMILES (mixtures/extracts) so cards stay clean.
  */
 export function MoleculeThumb({
   smiles,
@@ -146,14 +150,14 @@ export function MoleculeThumb({
         if (cancelled || !svg) return;
 
         const drawer = new SmilesDrawer.SmiDrawer({
-          padding: 6,
-          themes: { skininsight: MOLECULE_THEME },
+          padding: 4,
+          themes: { thumb: THUMB_THEME },
         });
 
         drawer.draw(
           trimmed,
           svg,
-          'skininsight',
+          'thumb',
           () => {
             if (!cancelled) setDone(true);
           },
@@ -172,12 +176,7 @@ export function MoleculeThumb({
   if (!trimmed) return null;
 
   return (
-    <span
-      className={cn(
-        'block h-14 w-[76px] overflow-hidden rounded-lg border border-border bg-surface-hover',
-        className,
-      )}
-    >
+    <span className={cn('block h-14 w-[76px] overflow-hidden', className)}>
       <svg
         ref={svgRef}
         aria-hidden
