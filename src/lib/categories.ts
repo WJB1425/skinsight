@@ -23,13 +23,14 @@ export const INGREDIENT_GROUPS: IngredientGroup[] = [
   { id: 'exfoliate', label: '去角质', keywords: ['去角质', 'BHA', 'AHA'] },
   { id: 'oil', label: '控油', keywords: ['控油', '吸油'] },
   { id: 'brighten', label: '美白提亮', keywords: ['美白', '提亮', '淡斑'] },
-  { id: 'antiage', label: '抗老抗氧', keywords: ['抗老', '抗衰', '抗氧化'] },
+  { id: 'antiage', label: '抗老抗氧', keywords: ['抗老', '抗衰', '抗氧化', '紧致'] },
   { id: 'soothe', label: '舒缓抗炎', keywords: ['舒缓', '抗炎'] },
-  { id: 'hydrate', label: '保湿修护', keywords: ['保湿', '修护', '屏障', '脂质'] },
+  { id: 'cleanse', label: '清洁/表活', keywords: ['表活', '清洁', '洁面', '起泡'] },
+  { id: 'hydrate', label: '保湿修护', keywords: ['保湿', '修护', '屏障', '脂质', '油脂'] },
   {
     id: 'base',
     label: '基质/其他',
-    keywords: ['硅油', '乳化', '脂肪醇', '防腐', '香料', '着色', '珠光', '成膜', '柔润', '柔焦'],
+    keywords: ['硅油', '乳化', '脂肪醇', '防腐', '香料', '香', '精油', '着色', '珠光', '成膜', '柔润', '柔焦', '螯合', '增稠', 'pH'],
   },
 ];
 

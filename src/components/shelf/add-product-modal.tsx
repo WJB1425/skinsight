@@ -190,7 +190,10 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                           </span>
                         ))}
                         {parsed.matched.length === 0 && (
-                          <span className="text-xs text-muted">未识别到收录成分，换种写法试试</span>
+                          <span className="text-xs leading-relaxed text-muted">
+                            未识别到我们收录的<strong>功效成分</strong>。目前成分库以功效 / 活性成分为主（如烟酰胺、视黄醇、透明质酸等），
+                            洁面、卸妆等以水、表活、基础油脂为主的产品可能识别较少——这通常不代表成分表有问题。
+                          </span>
                         )}
                       </div>
                     </div>

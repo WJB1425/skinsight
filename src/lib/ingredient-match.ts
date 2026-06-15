@@ -61,6 +61,36 @@ export const INGREDIENT_ALIASES: Record<string, string[]> = {
   trisiloxane: ['三硅氧烷', 'trisiloxane'],
   'tocopheryl-acetate': ['生育酚乙酸酯', '维生素e乙酸酯', '维生素e醋酸酯', 'tocopheryl acetate', 'vitamin e acetate'],
   adenosine: ['腺苷', 'adenosine'],
+  // —— 扩充批：基础 / 清洁 / 植物成分 ——
+  'butylene-glycol': ['丁二醇', 'butylene glycol', 'butanediol'],
+  'propylene-glycol': ['丙二醇', 'propylene glycol'],
+  'pentylene-glycol': ['戊二醇', 'pentylene glycol', 'pentanediol'],
+  betaine: ['甜菜碱', '三甲基甘氨酸', 'betaine', 'trimethylglycine'],
+  urea: ['尿素', 'urea', 'carbamide'],
+  'sodium-pca': ['pca钠', 'pca-na', '吡咯烷酮羧酸钠', 'sodium pca'],
+  sorbitol: ['山梨醇', '山梨糖醇', 'sorbitol'],
+  trehalose: ['海藻糖', 'trehalose'],
+  'sodium-laureth-sulfate': ['月桂醇聚醚硫酸酯钠', '脂肪醇聚氧乙烯醚硫酸酯钠', '聚氧乙烯醚硫酸酯钠', '醇醚硫酸酯钠', 'sles', 'sodium laureth sulfate', 'laureth sulfate'],
+  'cocamidopropyl-betaine': ['椰油酰胺丙基甜菜碱', 'capb', 'cocamidopropyl betaine'],
+  'cocamidopropylamine-oxide': ['椰油酰胺丙基氧化胺', '氧化胺', 'cocamidopropylamine oxide', 'lauramine oxide'],
+  'mes-sodium': ['脂肪酸甲酯磺酸钠', '甲酯磺酸钠', 'methyl ester sulfonate'],
+  'coco-glucoside': ['椰油基葡糖苷', '癸基葡糖苷', '烷基糖苷', 'coco-glucoside', 'decyl glucoside'],
+  'sodium-cocoyl-glycinate': ['椰油酰甘氨酸钠', '椰油酰基甘氨酸钠', 'sodium cocoyl glycinate'],
+  'caprylic-capric-triglyceride': ['辛癸酸甘油三酯', '癸酸甘油三酯', '辛酸癸酸甘油三酯', 'caprylic capric triglyceride'],
+  'shea-butter': ['乳木果油', '乳木果脂', '牛油果树果脂', 'shea butter', 'butyrospermum parkii'],
+  'jojoba-oil': ['霍霍巴油', '荷荷巴油', '霍霍巴籽油', 'jojoba', 'simmondsia'],
+  'orange-oil': ['甜橙油', '甜橙果皮油', '橙皮油', 'sweet orange oil', 'orange peel oil'],
+  'lemon-oil': ['柠檬油', '柠檬果皮油', '柠檬皮油', 'lemon oil', 'lemon peel oil'],
+  'sodium-benzoate': ['苯甲酸钠', 'sodium benzoate'],
+  'potassium-sorbate': ['山梨酸钾', 'potassium sorbate'],
+  'disodium-edta': ['edta二钠', '乙二胺四乙酸二钠', '依地酸二钠', 'disodium edta'],
+  'citric-acid': ['柠檬酸', '枸橼酸', 'citric acid'],
+  'xanthan-gum': ['黄原胶', '汉生胶', 'xanthan gum', 'xanthan'],
+  carbomer: ['卡波姆', '卡波', 'carbomer'],
+  caffeine: ['咖啡因', '咖啡碱', 'caffeine'],
+  'aloe-vera': ['芦荟提取物', '库拉索芦荟', '库拉索芦荟叶提取物', 'aloe vera', 'aloe barbadensis'],
+  'green-tea': ['绿茶提取物', '绿茶叶提取物', '茶叶提取物', 'green tea', 'camellia sinensis'],
+  'dipotassium-glycyrrhizate': ['甘草酸二钾', '甘草酸钾', '甘草提取物', '甘草根提取物', 'dipotassium glycyrrhizate'],
 };
 
 /** 归一化：小写、去括号/空格/中点，便于宽松比对。 */
@@ -69,6 +99,21 @@ function norm(s: string): string {
     .toLowerCase()
     .replace(/[（）()[\]【】]/g, '')
     .replace(/[\s　·•・*]/g, '')
+    .trim();
+}
+
+// 非成分噪声（水、分节小标题等）——按归一化后精确匹配直接忽略，既不算命中也不算未收录。
+const IGNORE = new Set(
+  ['水', 'water', 'aqua', '纯净水', '去离子水', '蒸馏水', '天然提取物', '植物提取物', '表面活性剂', '活性成分', '其他成分', '其他微量成分', '主要成分', '全部成分'].map(
+    (s) => s.toLowerCase().replace(/[\s　]/g, ''),
+  ),
+);
+
+/** 去掉成分表常见的行首序号 / 项目符号，如「1.」「2、」「(a)」「a)」「•」「- 」。 */
+function stripMarker(s: string): string {
+  return s
+    .replace(/^[\s　]*[（(]?[0-9０-９a-zA-Zⅰ-ⅹ一二三四五六七八九十]{1,3}[)）.、。:：]\s*/, '')
+    .replace(/^[\s　]*[•·▪◦*\-—–]+\s*/, '')
     .trim();
 }
 
@@ -106,7 +151,7 @@ export interface ParseResult {
 export function parseIngredientText(raw: string): ParseResult {
   const tokens = raw
     .split(/[,，、;；\n\r\t/／|]+/)
-    .map((t) => t.trim())
+    .map((t) => stripMarker(t.trim()))
     .filter(Boolean);
 
   const matchedIds = new Set<string>();
@@ -115,7 +160,7 @@ export function parseIngredientText(raw: string): ParseResult {
 
   for (const token of tokens) {
     const nt = norm(token);
-    if (!nt) continue;
+    if (!nt || IGNORE.has(nt)) continue;
     let bestId: string | null = null;
     let bestLen = 0;
     for (const { id, term, len } of TERMS) {
