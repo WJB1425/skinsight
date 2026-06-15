@@ -9,21 +9,27 @@ import {
   Camera,
   FlaskConical,
   ShoppingCart,
+  Layers,
+  LogIn,
+  LogOut,
   Menu,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/lib/auth';
 
 const navItems = [
   { href: '/', label: '首页', icon: Sparkles },
   { href: '/skin-test', label: '肤质测试', icon: Camera },
   { href: '/ingredients', label: '成分分析', icon: FlaskConical },
   { href: '/products', label: '产品推荐', icon: ShoppingCart },
+  { href: '/shelf', label: '我的护肤台', icon: Layers },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, configured, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 glass border-b border-border/70">
@@ -37,41 +43,69 @@ export function Navbar() {
             <span className="text-lg font-semibold tracking-tight text-foreground">SkinSight</span>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map(({ href, label, icon: Icon }) => {
-              const isActive = pathname === href;
-              return (
-                <Link key={href} href={href} className="relative">
-                  <motion.div
-                    className={cn(
-                      'relative z-10 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors',
-                      isActive ? 'text-primary' : 'text-muted hover:text-foreground'
-                    )}
-                    whileHover={{ y: -1 }}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {label}
-                  </motion.div>
-                  {isActive && (
+          <div className="flex items-center gap-2">
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.map(({ href, label, icon: Icon }) => {
+                const isActive = pathname === href;
+                return (
+                  <Link key={href} href={href} className="relative">
                     <motion.div
-                      className="absolute inset-0 bg-primary/10 rounded-full"
-                      layoutId="nav-active"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+                      className={cn(
+                        'relative z-10 flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium transition-colors',
+                        isActive ? 'text-primary' : 'text-muted hover:text-foreground',
+                      )}
+                      whileHover={{ y: -1 }}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </motion.div>
+                    {isActive && (
+                      <motion.div
+                        className="absolute inset-0 bg-primary/10 rounded-full"
+                        layoutId="nav-active"
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="md:hidden p-2 rounded-xl text-foreground hover:bg-surface-hover transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+            {/* Account control (only when Supabase configured) */}
+            {configured && (
+              <div className="hidden md:flex items-center gap-2 pl-2 ml-1 border-l border-border">
+                {user ? (
+                  <>
+                    <span className="max-w-[140px] truncate text-xs text-muted">{user.email}</span>
+                    <button
+                      onClick={() => signOut()}
+                      className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                    >
+                      <LogOut className="h-3.5 w-3.5" />
+                      登出
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-primary-hover"
+                  >
+                    <LogIn className="h-3.5 w-3.5" />
+                    登录
+                  </Link>
+                )}
+              </div>
+            )}
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className="md:hidden p-2 rounded-xl text-foreground hover:bg-surface-hover transition-colors"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Nav */}
@@ -93,7 +127,7 @@ export function Navbar() {
                       'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors',
                       isActive
                         ? 'text-primary bg-primary/10'
-                        : 'text-muted hover:text-foreground hover:bg-surface-hover'
+                        : 'text-muted hover:text-foreground hover:bg-surface-hover',
                     )}
                   >
                     <Icon className="w-4 h-4" />
@@ -101,6 +135,32 @@ export function Navbar() {
                   </Link>
                 );
               })}
+
+              {configured && (
+                <div className="mt-1 border-t border-border pt-2">
+                  {user ? (
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setMobileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      登出（{user.email}）
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-primary"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      登录 / 注册
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
           </motion.nav>
         )}
