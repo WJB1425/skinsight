@@ -789,6 +789,13 @@ export interface Product {
   keyIngredients: string[]; // 成分 ID
   rating: number;
   image?: string;
+  // ---- 比价（示例数据，接入电商 API 后实时更新）----
+  // 多渠道售价与评分。当前未填则由 getPriceCompare 从基准价确定性派生，
+  // 仅用于演示比价 UI，界面统一标注「示例数据」，不代表真实售价。
+  prices?: { taobao: number; jd: number; counter: number };
+  ratings?: { taobao: number; jd: number };
+  /** 是否为赞助 / 广告位（界面会标注 AD）。 */
+  ad?: boolean;
 }
 
 export const products: Product[] = [
@@ -804,6 +811,7 @@ export const products: Product[] = [
     description: '麦角硫因 + 虾青素 + 脱羧肌肽，抗氧抗糖双通路，改善暗沉和黄气。',
     keyIngredients: ['astaxanthin', 'niacinamide', 'peptides'],
     rating: 4.7,
+    ad: true,
   },
   {
     id: 'proya-ruby',
@@ -1206,4 +1214,43 @@ export function getRecommendedProducts(skinType: string): Product[] {
   return result.recommendedProducts
     .map(id => getProductById(id))
     .filter(Boolean) as Product[];
+}
+
+// ==================== 产品比价（示例数据）====================
+// 真实接入电商平台 API 前，用「确定性」规则从基准价派生 淘宝 / 京东 / 专柜
+// 三个渠道的示例价格与评分（非随机），仅用于演示比价 UI。界面统一标注
+// 「示例数据」，不代表真实售价。产品若显式提供 prices / ratings 则优先采用。
+
+export interface PlatformPrice {
+  key: 'taobao' | 'jd' | 'counter';
+  label: string;
+  price: number;
+  rating: number | null; // 专柜不展示评分
+  dot: string;
+  isLowest: boolean;
+}
+
+export function getPriceCompare(product: Product): PlatformPrice[] {
+  const base = product.price;
+  // 专柜≈吊牌价，电商按常见折扣（确定性派生）
+  const counter = product.prices?.counter ?? base;
+  const taobao = product.prices?.taobao ?? Math.round(base * 0.84);
+  const jd = product.prices?.jd ?? Math.round(base * 0.9);
+  const tRating = product.ratings?.taobao ?? product.rating;
+  const jRating =
+    product.ratings?.jd ?? Math.max(4, Math.round((product.rating - 0.1) * 10) / 10);
+  const lowest = Math.min(taobao, jd, counter);
+  return [
+    { key: 'taobao', label: '淘宝', price: taobao, rating: tRating, dot: '#ff5000', isLowest: taobao === lowest },
+    { key: 'jd', label: '京东', price: jd, rating: jRating, dot: '#e1251b', isLowest: jd === lowest },
+    { key: 'counter', label: '专柜', price: counter, rating: null, dot: '#9a9aa0', isLowest: counter === lowest },
+  ];
+}
+
+/** 该产品命中「肤质所需成分」的核心成分（返回成分 ID 列表）。 */
+export function getProductMatches(
+  product: Product,
+  recommendedIngredientIds: string[],
+): string[] {
+  return product.keyIngredients.filter((id) => recommendedIngredientIds.includes(id));
 }

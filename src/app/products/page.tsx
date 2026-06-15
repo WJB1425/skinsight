@@ -2,40 +2,47 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Star, Filter, Sparkles } from 'lucide-react';
+import { ShoppingCart, Filter, Sparkles, Info } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import {
   products,
   brands,
   mockSkinResults,
-  getRecommendedProducts,
-  getBrandById,
+  getProductMatches,
+  getIngredientById,
 } from '@/lib/mock-data';
-import type { Product } from '@/lib/mock-data';
 
 export default function ProductsPage() {
   const [selectedBrand, setSelectedBrand] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [showRecommendations, setShowRecommendations] = useState(false);
-  const [selectedSkinType, setSelectedSkinType] = useState<keyof typeof mockSkinResults>('combination');
+  const [selectedSkinType, setSelectedSkinType] =
+    useState<keyof typeof mockSkinResults>('combination');
 
   const categories = useMemo(() => {
     const cats = new Set(products.map((p) => p.category));
     return ['all', ...Array.from(cats)];
   }, []);
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchesBrand = selectedBrand === 'all' || p.brandId === selectedBrand;
-      const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-      return matchesBrand && matchesCategory;
-    });
-  }, [selectedBrand, selectedCategory]);
+  const skinResult = mockSkinResults[selectedSkinType];
+  const recIds = skinResult.recommendedIngredients;
+  const recNames = recIds.map((id) => getIngredientById(id)?.nameCn ?? id);
 
-  const recommendedProducts = useMemo(() => {
-    if (!showRecommendations) return [];
-    return getRecommendedProducts(selectedSkinType);
-  }, [showRecommendations, selectedSkinType]);
+  // Filter, then rank by how many of the skin type's needed ingredients each
+  // product contains — recommendations are always visible via the ordering,
+  // never hidden behind a toggle.
+  const sortedProducts = useMemo(() => {
+    return products
+      .filter((p) => {
+        const matchesBrand = selectedBrand === 'all' || p.brandId === selectedBrand;
+        const matchesCategory =
+          selectedCategory === 'all' || p.category === selectedCategory;
+        return matchesBrand && matchesCategory;
+      })
+      .sort(
+        (a, b) =>
+          getProductMatches(b, recIds).length - getProductMatches(a, recIds).length,
+      );
+  }, [selectedBrand, selectedCategory, recIds]);
 
   return (
     <div className="container-app py-8 sm:py-12">
@@ -43,97 +50,76 @@ export default function ProductsPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-10"
+        className="mb-6 text-center"
       >
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 ring-1 ring-inset ring-border shadow-soft mb-4">
-          <ShoppingCart className="w-7 h-7 text-amber-600" />
+        <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 shadow-soft ring-1 ring-inset ring-border">
+          <ShoppingCart className="h-7 w-7 text-amber-600" />
         </div>
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-2">产品推荐</h1>
-        <p className="text-muted max-w-md mx-auto">
-          基于你的肤质和需求，精选最适合的护肤产品
+        <h1 className="mb-2 text-3xl font-semibold tracking-tight sm:text-4xl">产品推荐</h1>
+        <p className="mx-auto max-w-md text-muted">
+          按你的肤质所需成分匹配，并实时比价
         </p>
       </motion.div>
 
-      {/* Skin Type Selection & Recommendations */}
+      {/* Skin-type selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="mx-auto mb-4 flex max-w-5xl flex-wrap items-center gap-2"
+      >
+        <span className="shrink-0 text-xs text-muted">你的肤质：</span>
+        {Object.entries(mockSkinResults).map(([key, value]) => (
+          <button
+            key={key}
+            onClick={() => setSelectedSkinType(key as keyof typeof mockSkinResults)}
+            className={`chip ${selectedSkinType === key ? 'chip-active' : 'chip-idle'}`}
+          >
+            {value.skinTypeCn}
+          </button>
+        ))}
+      </motion.div>
+
+      {/* Recommendation criterion — clear at a glance */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="max-w-2xl mx-auto mb-8 space-y-4"
+        className="mx-auto mb-6 flex max-w-5xl flex-wrap items-center gap-3.5 rounded-3xl border border-primary/[0.18] bg-gradient-to-r from-primary/[0.06] to-accent/[0.06] px-[18px] py-3.5"
       >
-        <div
-          className="card bg-gradient-to-r from-primary/[0.07] to-accent/[0.07] border-primary/20 cursor-pointer"
-          onClick={() => setShowRecommendations(!showRecommendations)}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 ring-1 ring-inset ring-primary/10 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  {showRecommendations ? '隐藏推荐' : '查看个性化推荐'}
-                </h3>
-                <p className="text-xs text-muted">
-                  选择肤质获取精准推荐
-                </p>
-              </div>
-            </div>
-            <motion.div
-              animate={{ rotate: showRecommendations ? 180 : 0 }}
-              className="text-muted"
-            >
-              ▼
-            </motion.div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[13px] bg-gradient-to-br from-primary/20 to-accent/20">
+          <Sparkles className="h-[19px] w-[19px] text-primary" />
+        </div>
+        <div className="min-w-[260px] flex-1">
+          <div className="text-[13px] font-semibold text-foreground">
+            推荐依据 · 按肤质成分匹配
+          </div>
+          <div className="mt-0.5 text-[12.5px] leading-snug text-muted">
+            你的肤质「<span className="font-medium text-foreground">{skinResult.skinTypeCn}</span>
+            」需重点补充下列成分；按成分匹配排序、
+            <span className="font-medium text-foreground">非付费广告</span>，赞助内容会标注 AD
           </div>
         </div>
-
-        {/* Skin Type Selector */}
-        {showRecommendations && (
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(mockSkinResults).map(([key, value]) => (
-              <button
-                key={key}
-                onClick={() => setSelectedSkinType(key as keyof typeof mockSkinResults)}
-                className={`chip ${selectedSkinType === key ? 'chip-active' : 'chip-idle'}`}
-              >
-                {value.skinTypeCn}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-1.5">
+          {recNames.map((n) => (
+            <span key={n} className="badge border border-primary/20 bg-primary/10 text-primary">
+              {n}
+            </span>
+          ))}
+        </div>
       </motion.div>
-
-      {/* Recommended Products */}
-      {showRecommendations && recommendedProducts.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          className="max-w-5xl mx-auto mb-10"
-        >
-          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Star className="w-4 h-4 text-amber-500" />
-            为你推荐 ({mockSkinResults[selectedSkinType].skinTypeCn})
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recommendedProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
-          </div>
-        </motion.div>
-      )}
 
       {/* Filters */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="max-w-5xl mx-auto mb-6 space-y-4"
+        className="mx-auto mb-6 max-w-5xl space-y-4"
       >
         {/* Brand Filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          <Filter className="w-4 h-4 text-muted shrink-0" />
-          <span className="text-xs text-muted shrink-0">品牌：</span>
+          <Filter className="h-4 w-4 shrink-0 text-muted" />
+          <span className="shrink-0 text-xs text-muted">品牌：</span>
           <button
             onClick={() => setSelectedBrand('all')}
             className={`chip whitespace-nowrap ${selectedBrand === 'all' ? 'chip-active' : 'chip-idle'}`}
@@ -152,8 +138,8 @@ export default function ProductsPage() {
         </div>
 
         {/* Category Filter */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted shrink-0">分类：</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="shrink-0 text-xs text-muted">分类：</span>
           {categories.map((cat) => (
             <button
               key={cat}
@@ -163,24 +149,35 @@ export default function ProductsPage() {
               {cat === 'all' ? '全部' : cat}
             </button>
           ))}
-          <span className="ml-auto text-xs text-muted">
-            {filteredProducts.length} 个产品
-          </span>
+          <span className="ml-auto text-xs text-muted">{sortedProducts.length} 个产品</span>
         </div>
       </motion.div>
 
-      {/* All Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-        {filteredProducts.map((product, index) => (
-          <ProductCard key={product.id} product={product} index={index} />
+      {/* Products Grid — ranked by ingredient match */}
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {sortedProducts.map((product, index) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            recommendedIngredientIds={recIds}
+            index={index}
+          />
         ))}
       </div>
 
-      {filteredProducts.length === 0 && (
-        <div className="text-center py-16">
+      {sortedProducts.length === 0 && (
+        <div className="py-16 text-center">
           <p className="text-muted">该筛选条件下暂无产品</p>
         </div>
       )}
+
+      <p className="mx-auto mt-6 flex max-w-5xl items-center justify-center gap-1.5 text-center text-[11px] leading-snug text-muted-dark">
+        <Info className="h-3 w-3 shrink-0" />
+        <span>
+          价格与评分为示例数据（接入电商 API 后实时更新）；排序按成分匹配、非付费广告，赞助内容标注
+          AD；商品图请使用品牌官网截图。
+        </span>
+      </p>
     </div>
   );
 }

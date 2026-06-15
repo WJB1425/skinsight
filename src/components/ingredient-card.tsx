@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSafetyLevel } from '@/lib/safety';
+import { MoleculeThumb } from '@/components/molecule-viewer';
 import type { Ingredient } from '@/lib/mock-data';
 
 interface IngredientCardProps {
@@ -18,8 +19,8 @@ function SafetyBadge({ score }: { score: number }) {
   const Icon = SAFETY_ICON[config.level];
 
   return (
-    <span className={cn('badge', config.badgeClass)}>
-      <Icon className="w-3 h-3 mr-1" />
+    <span className={cn('badge shrink-0', config.badgeClass)}>
+      <Icon className="mr-1 h-3 w-3" />
       {config.label} {score}/10
     </span>
   );
@@ -32,32 +33,28 @@ export function IngredientCard({ ingredient, index = 0 }: IngredientCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
       whileHover={{ y: -4 }}
-      className="card group cursor-pointer"
+      className="card group cursor-pointer p-3.5"
     >
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-            {ingredient.nameCn}
-          </h3>
-          <p className="text-xs text-muted mt-0.5">{ingredient.name}</p>
-        </div>
-        <SafetyBadge score={ingredient.safetyScore} />
-      </div>
-
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        <span className="badge bg-surface-hover text-muted border border-border">
-          {ingredient.category}
+      {/* Live-rendered 2D structure, floated so the title wraps around it. */}
+      {ingredient.smiles?.trim() && (
+        <span className="float-right ml-2.5">
+          <MoleculeThumb smiles={ingredient.smiles} />
         </span>
-        {ingredient.functions.map((tag, i) => (
-          <span key={i} className="badge bg-primary/10 text-primary border border-primary/20">
-            {tag}
-          </span>
-        ))}
-      </div>
+      )}
 
-      <p className="text-sm text-muted leading-relaxed line-clamp-2">
-        {ingredient.description}
-      </p>
+      <h3 className="text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+        {ingredient.nameCn}
+      </h3>
+      <p className="truncate text-[11px] text-muted">{ingredient.name}</p>
+
+      <div className="clear-both flex flex-wrap items-center gap-1.5 pt-3">
+        <SafetyBadge score={ingredient.safetyScore} />
+        {ingredient.functions[0] && (
+          <span className="badge shrink-0 border border-border bg-surface-hover text-muted">
+            {ingredient.functions[0]}
+          </span>
+        )}
+      </div>
     </motion.div>
   );
 }

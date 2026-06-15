@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Atom, AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 // Atom colors tuned for the light (#f5f5f7) surface so heteroatoms read clearly.
 const MOLECULE_THEME = {
@@ -115,5 +116,76 @@ export function MoleculeViewer({ smiles, name }: MoleculeViewerProps) {
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Compact 2D structure thumbnail for list cards. Same browser-side render as
+ * MoleculeViewer but in a small fixed box; renders nothing when there is no
+ * parsable SMILES (mixtures/extracts) so cards stay clean.
+ */
+export function MoleculeThumb({
+  smiles,
+  className,
+}: {
+  smiles?: string;
+  className?: string;
+}) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [done, setDone] = useState(false);
+  const trimmed = (smiles ?? '').trim();
+
+  useEffect(() => {
+    if (!trimmed) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const SmilesDrawer = (await import('smiles-drawer')).default;
+        const svg = svgRef.current;
+        if (cancelled || !svg) return;
+
+        const drawer = new SmilesDrawer.SmiDrawer({
+          padding: 6,
+          themes: { skininsight: MOLECULE_THEME },
+        });
+
+        drawer.draw(
+          trimmed,
+          svg,
+          'skininsight',
+          () => {
+            if (!cancelled) setDone(true);
+          },
+          () => {},
+        );
+      } catch {
+        /* unparseable — leave blank */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [trimmed]);
+
+  if (!trimmed) return null;
+
+  return (
+    <span
+      className={cn(
+        'block h-14 w-[76px] overflow-hidden rounded-lg border border-border bg-surface-hover',
+        className,
+      )}
+    >
+      <svg
+        ref={svgRef}
+        aria-hidden
+        className={cn(
+          'h-full w-full transition-opacity duration-500',
+          done ? 'opacity-100' : 'opacity-0',
+        )}
+      />
+    </span>
   );
 }
