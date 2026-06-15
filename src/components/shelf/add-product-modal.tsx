@@ -59,6 +59,44 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // —— AI 按名查（参考）——
+  const [aiName, setAiName] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiNote, setAiNote] = useState(false);
+
+  async function runAiLookup() {
+    const name = aiName.trim();
+    if (!name) return;
+    setAiError(null);
+    setAiLoading(true);
+    try {
+      const res = await fetch('/api/lookup-ingredients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (!data.configured) {
+        setAiError('AI 按名查暂未接入（需配置 LLM_API_KEY）。可改用「拍 / 贴成分表」手动录入。');
+        return;
+      }
+      if (!data.found || !data.ingredientsText) {
+        setAiError(data.note || 'AI 没把握识别这个产品，建议改用「拍 / 贴成分表」手动录入。');
+        return;
+      }
+      // 把 AI 结果灌入「拍成分表」流程，供核对 / 编辑后再添加
+      setText(data.ingredientsText);
+      setScanName(data.product || name);
+      setAiNote(true);
+      setTab('scan');
+    } catch {
+      setAiError('查询出错，请稍后重试。');
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   async function handleAddScan() {
     if (!parsed || parsed.matched.length === 0) return;
     setSubmitting(true);
@@ -149,6 +187,15 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
             {tab === 'scan' ? (
               <>
                 <ImageUpload onImageSelect={(_f, preview) => setThumbnail(preview)} />
+
+                {aiNote && (
+                  <div className="flex items-start gap-2 rounded-xl border border-violet-200/80 bg-violet-50 px-3.5 py-2.5 text-xs text-violet-800">
+                    <Sparkles className="mt-px h-3.5 w-3.5 shrink-0" />
+                    <span>
+                      以下成分由 <strong>AI 按名整理</strong>，仅供参考——请核对 / 编辑后再添加，以实物成分表为准。
+                    </span>
+                  </div>
+                )}
 
                 <div>
                   <div className="mb-1.5 flex items-center justify-between">
@@ -244,6 +291,47 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
             ) : (
               <>
                 <ImageUpload onImageSelect={() => undefined} />
+
+                {/* AI 按名识别：任意产品（含我们产品库没有的，如神仙水） */}
+                <div className="rounded-xl border border-violet-200/70 bg-violet-50/50 p-3.5">
+                  <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-violet-700">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    AI 按名识别（任意产品 · 参考）
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={aiName}
+                      onChange={(e) => setAiName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') runAiLookup();
+                      }}
+                      placeholder="输入产品名，如：SK-II 神仙水"
+                      className="input-base flex-1"
+                    />
+                    <button
+                      onClick={runAiLookup}
+                      disabled={!aiName.trim() || aiLoading}
+                      className="btn-secondary shrink-0"
+                    >
+                      {aiLoading ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted/40 border-t-foreground" />
+                      ) : (
+                        '查成分'
+                      )}
+                    </button>
+                  </div>
+                  {aiError && <p className="mt-2 text-xs text-red-600">{aiError}</p>}
+                  <p className="mt-2 text-[11px] leading-relaxed text-muted-dark">
+                    用 AI 按产品名整理成分，结果可能不准、请以实物成分表为准；查到后会带你去「拍 / 贴成分表」核对再添加。
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="h-px flex-1 bg-border" />
+                  <span className="shrink-0 text-[11px] text-muted-dark">或从产品库选择</span>
+                  <span className="h-px flex-1 bg-border" />
+                </div>
 
                 <div className="relative">
                   <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
