@@ -117,4 +117,40 @@
   .badge-danger {
     @apply bg-red-50 text-red-600 border border-red-200/80;
   }
+
+  /* Ingredients — two-column explorer (main grid + sticky conflict rail) */
+  .ss-ing-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 304px;
+    gap: 24px;
+    align-items: start;
+  }
+  .ss-ing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    grid-auto-rows: 1fr;
+  }
+  .ss-ing-aside {
+    position: sticky;
+    top: 84px;
+  }
+  @media (max-width: 1024px) {
+    .ss-ing-body {
+      grid-template-columns: 1fr;
+    }
+    .ss-ing-aside {
+      position: static;
+    }
+  }
+  @media (max-width: 560px) {
+    .ss-ing-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 380px) {
+    .ss-ing-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 }
