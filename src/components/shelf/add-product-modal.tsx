@@ -234,6 +234,12 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                   <Sparkles className="h-4 w-4" />
                   加入我的护肤台
                 </button>
+                {(!parsed || parsed.matched.length === 0) && (
+                  <p className="text-center text-xs leading-relaxed text-muted-dark">
+                    在上方「成分表文字」里粘贴或识别到成分后才能添加；
+                    「产品名称」只是备注，不参与识别。
+                  </p>
+                )}
               </>
             ) : (
               <>
