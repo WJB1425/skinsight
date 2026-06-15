@@ -30,6 +30,32 @@ const SAMPLE_INCI =
 
 const nameOf = (id: string) => getIngredientById(id)?.nameCn ?? id;
 
+// 上传图片在送模型前先压缩（最长边 ~1280px，JPEG 0.8），控制请求体积与调用成本。
+async function downscaleImage(dataUrl: string, maxDim = 1280, quality = 0.8): Promise<string> {
+  if (typeof document === 'undefined') return dataUrl;
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return resolve(dataUrl);
+      ctx.drawImage(img, 0, 0, w, h);
+      try {
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } catch {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
   const [tab, setTab] = useState<Tab>('scan');
 
@@ -59,11 +85,45 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // —— AI 按名查（参考）——
+  // —— AI 按名查 / 拍图识别（参考）——
   const [aiName, setAiName] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiNote, setAiNote] = useState(false);
+  const [visionLoading, setVisionLoading] = useState(false);
+  const [visionError, setVisionError] = useState<string | null>(null);
+
+  // 拍图识别：成分表照片 OCR / 包装识别产品 → 灌入可编辑的「拍成分表」流程
+  async function recognizeImage(preview: string) {
+    setVisionError(null);
+    setVisionLoading(true);
+    try {
+      const img = await downscaleImage(preview);
+      const res = await fetch('/api/lookup-ingredients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: img }),
+      });
+      const data = await res.json();
+      if (!data.configured) {
+        setVisionError('拍图识别暂未接入（需配置 LLM_API_KEY + 视觉模型）。可手动粘贴成分表或选产品。');
+        return;
+      }
+      if (!data.found || !data.ingredientsText) {
+        setVisionError(data.note || '没认出这张图，换张更清晰的（成分表 / 正面包装），或手动粘贴成分表。');
+        return;
+      }
+      setText(data.ingredientsText);
+      setScanName(data.product || scanName);
+      setThumbnail(preview);
+      setAiNote(true);
+      setTab('scan');
+    } catch {
+      setVisionError('识别出错，请稍后重试。');
+    } finally {
+      setVisionLoading(false);
+    }
+  }
 
   async function runAiLookup() {
     const name = aiName.trim();
@@ -178,21 +238,33 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
             <div className="flex items-start gap-2 rounded-xl border border-sky-200/80 bg-sky-50 px-3.5 py-2.5 text-xs text-sky-800">
               <Info className="mt-px h-3.5 w-3.5 shrink-0" />
               <span>
-                图像识别为<strong>演示功能</strong>：接入视觉模型后可自动读取照片。当前请
-                {tab === 'scan' ? '粘贴/核对成分表文字（识别结果可编辑）' : '从产品库选择产品'}
-                ——这部分是真实可用的。
+                上传 / 拍照后用 <strong>AI 自动识别</strong>（需配置模型）：成分表照片直接 OCR、拍包装识别产品；
+                也可手动{tab === 'scan' ? '粘贴成分表' : '选产品'}。识别结果可编辑，请核对后再添加。
               </span>
             </div>
 
             {tab === 'scan' ? (
               <>
-                <ImageUpload onImageSelect={(_f, preview) => setThumbnail(preview)} />
+                <ImageUpload
+                  onImageSelect={(_f, preview) => {
+                    setThumbnail(preview);
+                    recognizeImage(preview);
+                  }}
+                />
+
+                {visionLoading && (
+                  <p className="flex items-center gap-2 text-xs text-violet-700">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-300 border-t-violet-700" />
+                    AI 正在识别图片…
+                  </p>
+                )}
+                {visionError && <p className="text-xs text-red-600">{visionError}</p>}
 
                 {aiNote && (
                   <div className="flex items-start gap-2 rounded-xl border border-violet-200/80 bg-violet-50 px-3.5 py-2.5 text-xs text-violet-800">
                     <Sparkles className="mt-px h-3.5 w-3.5 shrink-0" />
                     <span>
-                      以下成分由 <strong>AI 按名整理</strong>，仅供参考——请核对 / 编辑后再添加，以实物成分表为准。
+                      以下成分由 <strong>AI 识别 / 整理</strong>，仅供参考——请核对 / 编辑后再添加，以实物成分表为准。
                     </span>
                   </div>
                 )}
@@ -290,7 +362,17 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
               </>
             ) : (
               <>
-                <ImageUpload onImageSelect={() => undefined} />
+                <ImageUpload
+                  onImageSelect={(_f, preview) => recognizeImage(preview)}
+                />
+
+                {visionLoading && (
+                  <p className="flex items-center gap-2 text-xs text-violet-700">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-300 border-t-violet-700" />
+                    AI 正在识别图片…
+                  </p>
+                )}
+                {visionError && <p className="text-xs text-red-600">{visionError}</p>}
 
                 {/* AI 按名识别：任意产品（含我们产品库没有的，如神仙水） */}
                 <div className="rounded-xl border border-violet-200/70 bg-violet-50/50 p-3.5">
