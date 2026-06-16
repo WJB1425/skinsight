@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
+import { AuthProvider } from '@/lib/auth';
 import './globals.css';
 
 const inter = Inter({
@@ -29,11 +30,13 @@ export default function RootLayout({
           <div className="absolute -top-40 left-1/4 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-indigo-200/30 blur-[150px]" />
           <div className="absolute top-10 right-0 h-[32rem] w-[32rem] translate-x-1/3 rounded-full bg-violet-200/25 blur-[150px]" />
         </div>
-        <Navbar />
-        <main className="min-h-[calc(100vh-64px)]">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <main className="min-h-[calc(100vh-64px)]">
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

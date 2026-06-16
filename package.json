@@ -10,6 +10,7 @@
     "check:smiles": "node scripts/check-smiles.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.378.0",

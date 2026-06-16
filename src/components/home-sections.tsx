@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Camera, FlaskConical, ShoppingCart, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Camera, FlaskConical, ShoppingCart, ShieldCheck, Layers, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { ingredients, brands, conflictRules } from '@/lib/mock-data';
 
@@ -37,6 +37,14 @@ const features = [
     href: '/ingredients',
     tint: 'from-emerald-500/15 to-teal-500/15',
     iconColor: 'text-emerald-600',
+  },
+  {
+    icon: Layers,
+    title: '我的护肤台',
+    description: '拍产品识别成分，分析搭配用法。',
+    href: '/shelf',
+    tint: 'from-rose-500/15 to-pink-500/15',
+    iconColor: 'text-rose-600',
   },
 ];
 
@@ -98,7 +106,7 @@ export function FeaturesSection() {
   return (
     <section className="pt-6">
       <div className="container-app">
-        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
