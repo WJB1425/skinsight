@@ -102,6 +102,14 @@ export const INGREDIENT_ALIASES: Record<string, string[]> = {
   'peg-100-stearate': ['peg-100硬脂酸酯', 'peg-100 stearate', '聚乙二醇-100硬脂酸酯'],
   chlorphenesin: ['氯苯甘醚', 'chlorphenesin'],
   'garcinia-butter': ['印度藤黄籽脂', '印度藤黄籽油', '藤黄果籽脂', 'garcinia indica seed butter', 'kokum butter'],
+  // —— 来自合作者 reference 资料 ——
+  'benzophenone-3': ['二苯酮-3', '二苯酮3', '羟苯甲酮', '氧苯酮', 'benzophenone-3', 'oxybenzone'],
+  'lauric-acid': ['月桂酸', '十二酸', 'lauric acid'],
+  'myristic-acid': ['肉豆蔻酸', '十四酸', 'myristic acid'],
+  'sodium-dodecylbenzenesulfonate': ['十二烷基苯磺酸钠', 'dodecylbenzene sulfonate', 'sdbs'],
+  'cardanol-ether': ['腰果酚聚氧乙烯醚', '腰果酚', 'cardanol'],
+  'carminic-acid': ['胭脂红酸', '胭脂红', '洋红', '胭脂虫红', 'carmine', 'carminic acid'],
+  'superoxide-dismutase': ['超氧化物歧化酶', 'superoxide dismutase'],
 };
 
 // 日语 / 法语别名（与上表合并参与匹配）。覆盖常见成分，长尾可走「AI 规范化」兜底。

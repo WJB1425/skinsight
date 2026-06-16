@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSafetyLevel } from '@/lib/safety';
+import { isInorganic } from '@/lib/categories';
 import { MoleculeThumb } from '@/components/molecule-viewer';
 import type { Ingredient } from '@/lib/mock-data';
 
@@ -37,8 +38,9 @@ export function IngredientCard({ ingredient, index = 0, onClick }: IngredientCar
       onClick={onClick}
       className="card group h-full cursor-pointer p-3.5"
     >
-      {/* Live-rendered 2D structure, floated so the title wraps around it. */}
-      {ingredient.smiles?.trim() && (
+      {/* Live-rendered 2D structure, floated so the title wraps around it.
+          无机/晶体成分不画（避免误导性的「假分子」缩略图）。 */}
+      {ingredient.smiles?.trim() && !isInorganic(ingredient.id) && (
         <span className="float-right ml-2.5 mb-0.5">
           <MoleculeThumb smiles={ingredient.smiles} />
         </span>

@@ -43,3 +43,21 @@ export function getCategoryGroup(category: string): string {
   }
   return FALLBACK_GROUP_ID; // anything unmatched falls into 基质/其他
 }
+
+// ==================== 无机 / 晶体成分 ====================
+// 这些是无机晶体 / 矿物，以晶格(晶胞)形式存在，没有单一有机分子结构。用 SMILES 画出来
+// 会得到误导性的「假分子」，所以详情页对它们不画分子骨架，改展示规范下标化学式 + 标注。
+// 常规化学式（习惯写法，非 openchemlib 的元素排序），FormulaText 会把数字渲染为下标。
+export const INORGANIC_FORMULA: Record<string, string> = {
+  'titanium-dioxide': 'TiO2',
+  'zinc-oxide': 'ZnO',
+  'iron-oxides': 'Fe2O3 / Fe3O4 等',
+  silica: 'SiO2',
+  mica: 'KAl2(AlSi3O10)(OH)2',
+  talc: 'Mg3Si4O10(OH)2',
+};
+
+/** 该成分是否为无机/晶体（矿物），详情页应展示晶体化学式而非分子骨架图。 */
+export function isInorganic(id: string): boolean {
+  return id in INORGANIC_FORMULA;
+}

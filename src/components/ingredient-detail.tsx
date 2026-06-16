@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert, X, Atom } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSafetyLevel, getIrritationConfig, getPregnancyConfig } from '@/lib/safety';
+import { isInorganic, INORGANIC_FORMULA } from '@/lib/categories';
 import { MoleculeViewer } from '@/components/molecule-viewer';
 import { DataSource } from '@/components/data-source';
 import { MedicalDisclaimer } from '@/components/medical-disclaimer';
@@ -119,16 +120,33 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
                 <Atom className="w-4 h-4 text-accent" />
                 化学结构
               </h4>
-              <MoleculeViewer smiles={ingredient.smiles} name={ingredient.nameCn} />
-              {ingredient.formula && (
-                <p className="mt-2 text-sm text-foreground">
-                  分子式：<span className="font-mono"><FormulaText formula={ingredient.formula} /></span>
-                </p>
-              )}
-              {ingredient.smiles && (
-                <p className="mt-1 font-mono text-[11px] text-muted-dark break-all leading-relaxed">
-                  SMILES: {ingredient.smiles}
-                </p>
+              {isInorganic(ingredient.id) ? (
+                /* 无机/晶体：不画分子骨架（会误导），改展示规范下标化学式 + 标注 */
+                <div className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-surface-hover px-6 text-center">
+                  <span className="font-mono text-3xl font-semibold tracking-tight text-foreground">
+                    <FormulaText formula={INORGANIC_FORMULA[ingredient.id]} />
+                  </span>
+                  <span className="badge border border-amber-200/80 bg-amber-50 text-amber-700">
+                    晶体 / 无机 · 非分子结构
+                  </span>
+                  <p className="text-[11px] leading-relaxed text-muted-dark">
+                    该成分为无机晶体（矿物），以晶格 / 晶胞形式存在，没有单一有机分子结构，故不展示分子骨架图。
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <MoleculeViewer smiles={ingredient.smiles} name={ingredient.nameCn} />
+                  {ingredient.formula && (
+                    <p className="mt-2 text-sm text-foreground">
+                      分子式：<span className="font-mono"><FormulaText formula={ingredient.formula} /></span>
+                    </p>
+                  )}
+                  {ingredient.smiles && (
+                    <p className="mt-1 font-mono text-[11px] text-muted-dark break-all leading-relaxed">
+                      SMILES: {ingredient.smiles}
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
