@@ -79,6 +79,8 @@ export interface UseShelf {
   loading: boolean;
   /** 当前是否云端持久化（已登录且已接入 Supabase）。 */
   persisted: boolean;
+  error: string | null;
+  clearError: () => void;
   addItem: (item: NewShelfItem) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
   clear: () => Promise<void>;
@@ -88,6 +90,7 @@ export function useShelf(): UseShelf {
   const { user } = useAuth();
   const [items, setItems] = useState<ShelfItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const persisted = Boolean(user && supabase);
   const mergedFor = useRef<string | null>(null);
 
@@ -103,12 +106,13 @@ export function useShelf(): UseShelf {
           await supabase.from('shelf_items').insert(guest.map(itemToInsert));
           writeGuest([]);
         }
-        const { data, error } = await supabase
+        const { data, error: loadErr } = await supabase
           .from('shelf_items')
           .select('*')
           .order('created_at', { ascending: false });
         if (!active) return;
-        setItems(error ? [] : (data ?? []).map(rowToItem));
+        // 拉取失败时保留现有列表，绝不清空（避免闪回空态）
+        if (!loadErr) setItems((data ?? []).map(rowToItem));
       } else {
         if (!active) return;
         setItems(readGuest().sort((a, b) => b.createdAt - a.createdAt));
@@ -118,21 +122,30 @@ export function useShelf(): UseShelf {
     return () => {
       active = false;
     };
-  }, [user]);
+    // 只在用户身份(id)变化时重载，避免 user 对象引用变化导致反复重新拉取/卡顿
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const addItem = useCallback(
     async (partial: NewShelfItem) => {
+      // 乐观更新：立即在界面显示，不阻塞 UI；再后台持久化
+      const optimistic: ShelfItem = { ...partial, id: newId(), createdAt: Date.now() };
       if (user && supabase) {
-        const { data, error } = await supabase
+        setItems((prev) => [optimistic, ...prev]);
+        const { data, error: insErr } = await supabase
           .from('shelf_items')
           .insert(itemToInsert(partial))
           .select('*')
           .single();
-        if (!error && data) setItems((prev) => [rowToItem(data), ...prev]);
+        if (insErr) {
+          setItems((prev) => prev.filter((i) => i.id !== optimistic.id)); // 回滚
+          setError('云端保存失败，请检查网络或重新登录后重试。');
+          return;
+        }
+        if (data) setItems((prev) => prev.map((i) => (i.id === optimistic.id ? rowToItem(data) : i)));
       } else {
-        const item: ShelfItem = { ...partial, id: newId(), createdAt: Date.now() };
         setItems((prev) => {
-          const next = [item, ...prev];
+          const next = [optimistic, ...prev];
           writeGuest(next);
           return next;
         });
@@ -170,5 +183,7 @@ export function useShelf(): UseShelf {
     }
   }, [user]);
 
-  return { items, loading, persisted, addItem, removeItem, clear };
+  const clearError = useCallback(() => setError(null), []);
+
+  return { items, loading, persisted, error, clearError, addItem, removeItem, clear };
 }

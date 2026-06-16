@@ -83,8 +83,6 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
   }, [query]);
   const pickedProduct = picked ? products.find((p) => p.id === picked) : null;
 
-  const [submitting, setSubmitting] = useState(false);
-
   // —— AI 候选 / 识别（参考）——
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -194,10 +192,10 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
     }
   }
 
-  async function handleAddScan() {
+  // 乐观提交：立即关闭弹窗（护肤台会即时显示新项），持久化在后台进行
+  function handleAddScan() {
     if (!parsed || parsed.matched.length === 0) return;
-    setSubmitting(true);
-    await onAdd({
+    void onAdd({
       source: 'scan',
       name: scanName.trim() || '识别的产品',
       ingredientIds: parsed.matched.map((m) => m.id),
@@ -206,11 +204,10 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
     onClose();
   }
 
-  async function handleAddProduct() {
+  function handleAddProduct() {
     if (!pickedProduct) return;
-    setSubmitting(true);
     const brand = getBrandById(pickedProduct.brandId);
-    await onAdd({
+    void onAdd({
       source: 'product',
       productId: pickedProduct.id,
       name: pickedProduct.nameCn,
@@ -389,7 +386,7 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
 
                 <button
                   onClick={handleAddScan}
-                  disabled={!parsed || parsed.matched.length === 0 || submitting}
+                  disabled={!parsed || parsed.matched.length === 0}
                   className="btn-primary w-full"
                 >
                   <Sparkles className="h-4 w-4" />
@@ -540,7 +537,6 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                     </div>
                     <button
                       onClick={handleAddProduct}
-                      disabled={submitting}
                       className="btn-primary w-full"
                     >
                       <Sparkles className="h-4 w-4" />

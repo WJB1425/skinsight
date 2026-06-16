@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Layers, Plus, ScanLine, Package, LogIn, Cloud, HardDrive } from 'lucide-react';
+import { Layers, Plus, ScanLine, Package, LogIn, Cloud, HardDrive, AlertCircle, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useShelf } from '@/lib/shelf';
 import { analyzeShelf, type RoutineProduct } from '@/lib/routine';
@@ -17,7 +17,7 @@ import type { Ingredient } from '@/lib/mock-data';
 
 export default function ShelfPage() {
   const { user, configured } = useAuth();
-  const { items, loading, persisted, addItem, removeItem } = useShelf();
+  const { items, loading, persisted, error, clearError, addItem, removeItem } = useShelf();
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Ingredient | null>(null);
   const month = new Date().getMonth();
@@ -77,6 +77,16 @@ export default function ShelfPage() {
           ) : (
             <>本机试用模式：账号系统尚未接入，数据仅存当前浏览器（配置见 .env.example）。</>
           )}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-5 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs text-red-700">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1">{error}</span>
+          <button onClick={clearError} className="rounded p-0.5 hover:bg-red-100" aria-label="关闭">
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
       )}
 
