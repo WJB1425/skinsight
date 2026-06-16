@@ -91,11 +91,68 @@ export const INGREDIENT_ALIASES: Record<string, string[]> = {
   'aloe-vera': ['芦荟提取物', '库拉索芦荟', '库拉索芦荟叶提取物', 'aloe vera', 'aloe barbadensis'],
   'green-tea': ['绿茶提取物', '绿茶叶提取物', '茶叶提取物', 'green tea', 'camellia sinensis'],
   'dipotassium-glycyrrhizate': ['甘草酸二钾', '甘草酸钾', '甘草提取物', '甘草根提取物', 'dipotassium glycyrrhizate'],
+  // —— 扩充批 2 ——
+  galactomyces: ['半乳糖酵母样菌发酵产物滤液', '酵母提取物', '酵母滤液', '酵母发酵滤液', 'pitera', 'galactomyces', 'galactomyces ferment filtrate'],
+  'hexylene-glycol': ['1,2-己二醇', '己二醇', 'hexylene glycol', 'hexanediol', '1,2-hexanediol'],
+  hydroxyacetophenone: ['对羟基苯乙酮', '4-羟基苯乙酮', 'hydroxyacetophenone', '4-hydroxyacetophenone'],
+  'sodium-citrate': ['柠檬酸钠', '枸橼酸钠', 'sodium citrate', 'trisodium citrate'],
+  triethanolamine: ['三乙醇胺', 'triethanolamine'],
+  'stearic-acid': ['硬脂酸', '十八酸', 'stearic acid'],
+  'ethylhexyl-palmitate': ['棕榈酸乙基己酯', '棕榈酸异辛酯', 'ethylhexyl palmitate', 'octyl palmitate'],
+  'peg-100-stearate': ['peg-100硬脂酸酯', 'peg-100 stearate', '聚乙二醇-100硬脂酸酯'],
+  chlorphenesin: ['氯苯甘醚', 'chlorphenesin'],
+  'garcinia-butter': ['印度藤黄籽脂', '印度藤黄籽油', '藤黄果籽脂', 'garcinia indica seed butter', 'kokum butter'],
 };
 
-/** 归一化：小写、去括号/空格/中点，便于宽松比对。 */
+// 日语 / 法语别名（与上表合并参与匹配）。覆盖常见成分，长尾可走「AI 规范化」兜底。
+export const INGREDIENT_ALIASES_JP_FR: Record<string, string[]> = {
+  'hyaluronic-acid': ['ヒアルロン酸', 'ヒアルロン酸na', 'ヒアルロン酸ナトリウム', 'acide hyaluronique', 'hyaluronate de sodium'],
+  glycerin: ['グリセリン', 'glycérine', 'glycerine', 'glycérol'],
+  ceramides: ['セラミド', 'セラミドnp', 'céramides', 'céramide'],
+  squalane: ['スクワラン', 'squalane'],
+  panthenol: ['パンテノール', 'panthénol'],
+  niacinamide: ['ナイアシンアミド', 'ニコチン酸アミド', 'niacinamide'],
+  'vitamin-c': ['アスコルビン酸', 'ビタミンc', 'acide ascorbique', 'vitamine c'],
+  arbutin: ['アルブチン', 'arbutine'],
+  'tranexamic-acid': ['トラネキサム酸', 'acide tranexamique'],
+  retinol: ['レチノール', 'rétinol'],
+  retinal: ['レチナール', 'rétinaldéhyde'],
+  'salicylic-acid': ['サリチル酸', 'acide salicylique'],
+  'glycolic-acid': ['グリコール酸', 'acide glycolique'],
+  'lactic-acid': ['乳酸', 'acide lactique'],
+  'mandelic-acid': ['マンデル酸', 'acide mandélique'],
+  centella: ['ツボクサエキス', 'ツボクサ', 'シカ', 'centella'],
+  allantoin: ['アラントイン', 'allantoïne'],
+  'vitamin-e': ['トコフェロール', 'ビタミンe', 'tocophérol', 'vitamine e'],
+  adenosine: ['アデノシン', 'adénosine'],
+  dimethicone: ['ジメチコン', 'diméthicone'],
+  phenoxyethanol: ['フェノキシエタノール', 'phénoxyéthanol'],
+  fragrance: ['香料', 'parfum'],
+  'butylene-glycol': ['ブチレングリコール', 'butylène glycol'],
+  'propylene-glycol': ['プロピレングリコール', 'propylène glycol'],
+  'pentylene-glycol': ['ペンチレングリコール', 'pentylène glycol'],
+  betaine: ['ベタイン', 'bétaïne'],
+  'citric-acid': ['クエン酸', 'acide citrique'],
+  'sodium-citrate': ['クエン酸na', 'クエン酸ナトリウム', 'citrate de sodium'],
+  'titanium-dioxide': ['酸化チタン', 'dioxyde de titane'],
+  'zinc-oxide': ['酸化亜鉛', 'oxyde de zinc'],
+  carbomer: ['カルボマー', 'carbomère'],
+  'xanthan-gum': ['キサンタンガム', 'gomme xanthane'],
+  'tocopheryl-acetate': ['酢酸トコフェロール', 'トコフェリルアセテート', 'acétate de tocophérol'],
+  'sodium-benzoate': ['安息香酸na', '安息香酸ナトリウム', 'benzoate de sodium'],
+  'potassium-sorbate': ['ソルビン酸k', 'sorbate de potassium'],
+  ethylhexylglycerin: ['エチルヘキシルグリセリン', 'éthylhexylglycérine'],
+  'stearic-acid': ['ステアリン酸', 'acide stéarique'],
+  triethanolamine: ['トリエタノールアミン', 'triéthanolamine'],
+  'disodium-edta': ['edta-2na', 'エデト酸塩', 'edta disodique'],
+  'aloe-vera': ['アロエベラ', 'アロエ', 'aloe vera'],
+  'hexylene-glycol': ['ヘキサンジオール', 'hexanediol'],
+};
+
+/** 归一化：全角转半角、小写、去括号/空格/中点，便于中日法文宽松比对。 */
 function norm(s: string): string {
   return s
+    .replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0)) // 全角字母数字 → 半角
     .toLowerCase()
     .replace(/[（）()[\]【】]/g, '')
     .replace(/[\s　·•・*]/g, '')
@@ -104,7 +161,7 @@ function norm(s: string): string {
 
 // 非成分噪声（水、分节小标题等）——按归一化后精确匹配直接忽略，既不算命中也不算未收录。
 const IGNORE = new Set(
-  ['水', 'water', 'aqua', '纯净水', '去离子水', '蒸馏水', '天然提取物', '植物提取物', '表面活性剂', '活性成分', '其他成分', '其他微量成分', '主要成分', '全部成分'].map(
+  ['水', 'water', 'aqua', 'eau', '纯净水', '去离子水', '蒸馏水', '精制水', '天然提取物', '植物提取物', '表面活性剂', '活性成分', '其他成分', '其他微量成分', '主要成分', '全部成分'].map(
     (s) => s.toLowerCase().replace(/[\s　]/g, ''),
   ),
 );
@@ -128,7 +185,12 @@ const TERMS: Term[] = (() => {
   const out: Term[] = [];
   for (const ing of ingredients) {
     const seen = new Set<string>();
-    for (const r of [ing.nameCn, ing.name, ...(INGREDIENT_ALIASES[ing.id] ?? [])]) {
+    for (const r of [
+      ing.nameCn,
+      ing.name,
+      ...(INGREDIENT_ALIASES[ing.id] ?? []),
+      ...(INGREDIENT_ALIASES_JP_FR[ing.id] ?? []),
+    ]) {
       const t = norm(r);
       if (t && !seen.has(t)) {
         seen.add(t);
@@ -149,8 +211,9 @@ export interface ParseResult {
  * 避免「甘油硬脂酸酯」误命中「甘油」）；命中需精确相等，或检索词≥3字且被词条包含。
  */
 export function parseIngredientText(raw: string): ParseResult {
+  // 按分隔符切词；半角逗号若夹在数字之间（如「1,2-己二醇」「1,3-丁二醇」）不拆分。
   const tokens = raw
-    .split(/[,，、;；\n\r\t/／|]+/)
+    .split(/[，、・;；\n\r\t/／|]+|,(?!\s*\d)/)
     .map((t) => stripMarker(t.trim()))
     .filter(Boolean);
 

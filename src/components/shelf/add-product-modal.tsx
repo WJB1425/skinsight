@@ -93,6 +93,29 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
   const [aiConfigured, setAiConfigured] = useState(true);
   const [visionLoading, setVisionLoading] = useState(false);
   const [visionError, setVisionError] = useState<string | null>(null);
+  const [normalizing, setNormalizing] = useState(false);
+
+  // 多语言/含杂质成分表 → 让 AI 翻译规范化为中文规范成分名，再交给本地解析
+  async function normalizeText() {
+    if (!text.trim()) return;
+    setNormalizing(true);
+    try {
+      const res = await fetch('/api/lookup-ingredients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ normalize: text }),
+      });
+      const data = await res.json();
+      if (data.configured && data.found && data.ingredientsText) {
+        setText(data.ingredientsText);
+        setAiNote(true);
+      }
+    } catch {
+      /* 忽略：保持原文本 */
+    } finally {
+      setNormalizing(false);
+    }
+  }
 
   // 输入即出候选：对搜索词防抖后，让 AI 列出可能指代的产品
   useEffect(() => {
@@ -309,15 +332,31 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                 )}
 
                 <div>
-                  <div className="mb-1.5 flex items-center justify-between">
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
                     <label className="text-sm font-semibold text-foreground">成分表文字</label>
-                    <button
-                      type="button"
-                      onClick={() => setText(SAMPLE_INCI)}
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      填入示例
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={normalizeText}
+                        disabled={!text.trim() || normalizing}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 hover:underline disabled:opacity-50"
+                        title="日/法/英等多语言或排版杂乱时，用 AI 翻译并规范化为中文成分名"
+                      >
+                        {normalizing ? (
+                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
+                        ) : (
+                          <Sparkles className="h-3 w-3" />
+                        )}
+                        AI 规范化（多语言）
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setText(SAMPLE_INCI)}
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        填入示例
+                      </button>
+                    </div>
                   </div>
                   <textarea
                     value={text}
