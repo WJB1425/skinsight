@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -85,14 +85,48 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // —— AI 按名查 / 拍图识别（参考）——
-  const [aiName, setAiName] = useState('');
+  // —— AI 候选 / 识别（参考）——
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiNote, setAiNote] = useState(false);
   const [aiResolved, setAiResolved] = useState('');
+  const [aiCandidates, setAiCandidates] = useState<{ brand: string; product: string; alias?: string }[]>([]);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [aiConfigured, setAiConfigured] = useState(true);
   const [visionLoading, setVisionLoading] = useState(false);
   const [visionError, setVisionError] = useState<string | null>(null);
+
+  // 输入即出候选：对搜索词防抖后，让 AI 列出可能指代的产品
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setAiCandidates([]);
+      return;
+    }
+    let active = true;
+    setSuggestLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/lookup-ingredients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ suggest: q }),
+        });
+        const data = await res.json();
+        if (!active) return;
+        setAiConfigured(data.configured !== false);
+        setAiCandidates(Array.isArray(data.candidates) ? data.candidates : []);
+      } catch {
+        if (active) setAiCandidates([]);
+      } finally {
+        if (active) setSuggestLoading(false);
+      }
+    }, 450);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [query]);
 
   // 拍图识别：成分表照片 OCR / 包装识别产品 → 灌入可编辑的「拍成分表」流程
   async function recognizeImage(preview: string) {
@@ -127,30 +161,30 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
     }
   }
 
-  async function runAiLookup() {
-    const name = aiName.trim();
-    if (!name) return;
+  // 选中一个候选（或直接用输入词）→ 取其成分 → 灌入可编辑的「拍成分表」流程
+  async function pickAiCandidate(brand: string, product: string) {
+    const full = [brand, product].filter(Boolean).join(' ').trim();
+    if (!full) return;
     setAiError(null);
     setAiLoading(true);
     try {
       const res = await fetch('/api/lookup-ingredients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: full }),
       });
       const data = await res.json();
       if (!data.configured) {
-        setAiError('AI 按名查暂未接入（需配置 LLM_API_KEY）。可改用「拍 / 贴成分表」手动录入。');
+        setAiError('AI 识别暂未接入（需配置 LLM_API_KEY）。可从下方产品库选择，或改用「拍 / 贴成分表」。');
         return;
       }
       if (!data.found || !data.ingredientsText) {
-        setAiError(data.note || 'AI 没把握识别这个产品，建议改用「拍 / 贴成分表」手动录入。');
+        setAiError(data.note || '没查到该产品成分，建议改用「拍 / 贴成分表」手动录入。');
         return;
       }
-      // 把 AI 结果灌入「拍成分表」流程，供核对 / 编辑后再添加
       setText(data.ingredientsText);
-      setScanName(data.product || name);
-      setAiResolved([data.brand, data.product].filter(Boolean).join(' '));
+      setScanName(data.product || product);
+      setAiResolved([data.brand || brand, data.product || product].filter(Boolean).join(' '));
       setAiNote(true);
       setTab('scan');
     } catch {
@@ -382,47 +416,7 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                 )}
                 {visionError && <p className="text-xs text-red-600">{visionError}</p>}
 
-                {/* AI 按名识别：任意产品（含我们产品库没有的，如神仙水） */}
-                <div className="rounded-xl border border-violet-200/70 bg-violet-50/50 p-3.5">
-                  <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-violet-700">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    AI 按名识别（任意产品 · 参考）
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={aiName}
-                      onChange={(e) => setAiName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') runAiLookup();
-                      }}
-                      placeholder="输入产品名，如：SK-II 神仙水"
-                      className="input-base flex-1"
-                    />
-                    <button
-                      onClick={runAiLookup}
-                      disabled={!aiName.trim() || aiLoading}
-                      className="btn-secondary shrink-0"
-                    >
-                      {aiLoading ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted/40 border-t-foreground" />
-                      ) : (
-                        '查成分'
-                      )}
-                    </button>
-                  </div>
-                  {aiError && <p className="mt-2 text-xs text-red-600">{aiError}</p>}
-                  <p className="mt-2 text-[11px] leading-relaxed text-muted-dark">
-                    用 AI 按产品名整理成分，结果可能不准、请以实物成分表为准；查到后会带你去「拍 / 贴成分表」核对再添加。
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="h-px flex-1 bg-border" />
-                  <span className="shrink-0 text-[11px] text-muted-dark">或从产品库选择</span>
-                  <span className="h-px flex-1 bg-border" />
-                </div>
-
+                {/* 统一搜索：输入即出候选（产品库精确 + AI 识别），点选即出成分 */}
                 <div className="relative">
                   <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
                   <input
@@ -431,70 +425,129 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                     onChange={(e) => {
                       setQuery(e.target.value);
                       setPicked(null);
+                      setAiError(null);
                     }}
-                    placeholder="搜索产品 / 品牌（中英文）..."
+                    placeholder="搜产品名 / 昵称，如：神仙水、小棕瓶、修丽可…"
                     className="input-base pl-10"
                   />
                 </div>
 
-                <div className="max-h-56 space-y-1.5 overflow-y-auto">
-                  {filtered.map((p) => {
-                    const brand = getBrandById(p.brandId);
-                    const active = picked === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => setPicked(p.id)}
-                        className={cn(
-                          'flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors',
-                          active
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-border-hover hover:bg-surface-hover',
+                {aiError && <p className="text-xs text-red-600">{aiError}</p>}
+
+                <div className="max-h-64 space-y-2 overflow-y-auto">
+                  {/* 产品库精确匹配 */}
+                  {query.trim() && filtered.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="px-1 text-[11px] font-semibold text-muted-dark">产品库（精确）</p>
+                      {filtered.map((p) => {
+                        const brand = getBrandById(p.brandId);
+                        const active = picked === p.id;
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => setPicked(p.id)}
+                            className={cn(
+                              'flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors',
+                              active
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-border-hover hover:bg-surface-hover',
+                            )}
+                          >
+                            <Package className="h-4 w-4 shrink-0 text-muted" />
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium text-foreground">{p.nameCn}</p>
+                              <p className="truncate text-[11px] text-muted">
+                                {brand?.nameCn} · {p.category}
+                              </p>
+                            </div>
+                            {active && <Check className="h-4 w-4 shrink-0 text-primary" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* AI 识别候选 */}
+                  {query.trim().length >= 2 && (
+                    <div className="space-y-1.5">
+                      <p className="flex items-center gap-1.5 px-1 text-[11px] font-semibold text-violet-600">
+                        <Sparkles className="h-3 w-3" />
+                        AI 识别（参考）
+                        {suggestLoading && (
+                          <span className="h-3 w-3 animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
                         )}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium text-foreground">
-                            {p.nameCn}
-                          </p>
-                          <p className="truncate text-[11px] text-muted">
-                            {brand?.nameCn} · {p.category}
-                          </p>
-                        </div>
-                        {active && <Check className="h-4 w-4 shrink-0 text-primary" />}
-                      </button>
-                    );
-                  })}
-                  {filtered.length === 0 && (
+                      </p>
+                      {aiCandidates.map((c, i) => (
+                        <button
+                          key={i}
+                          onClick={() => pickAiCandidate(c.brand, c.product)}
+                          disabled={aiLoading}
+                          className="flex w-full items-center gap-3 rounded-xl border border-violet-200/70 bg-violet-50/40 px-3 py-2.5 text-left transition-colors hover:border-violet-300 hover:bg-violet-50 disabled:opacity-60"
+                        >
+                          <Sparkles className="h-4 w-4 shrink-0 text-violet-500" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">{c.product}</p>
+                            <p className="truncate text-[11px] text-muted">
+                              {c.brand}
+                              {c.alias ? ` · 又名「${c.alias}」` : ''}
+                            </p>
+                          </div>
+                        </button>
+                      ))}
+                      {/* 兜底：直接用输入词查 */}
+                      {!suggestLoading && (
+                        <button
+                          onClick={() => pickAiCandidate('', query.trim())}
+                          disabled={aiLoading}
+                          className="flex w-full items-center gap-2 rounded-xl border border-dashed border-violet-300 px-3 py-2 text-left text-xs text-violet-700 transition-colors hover:bg-violet-50 disabled:opacity-60"
+                        >
+                          {aiLoading ? (
+                            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-violet-300 border-t-violet-600" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5 shrink-0" />
+                          )}
+                          直接让 AI 查「{query.trim()}」的成分
+                        </button>
+                      )}
+                      {!suggestLoading && !aiConfigured && (
+                        <p className="px-1 text-[11px] text-muted-dark">AI 识别未接入（需配置模型）。</p>
+                      )}
+                    </div>
+                  )}
+
+                  {!query.trim() && (
                     <p className="px-1 py-6 text-center text-xs text-muted">
-                      没找到？切到「拍 / 贴成分表」手动录入即可。
+                      输入产品名或昵称，下面会列出可能的产品供你选择。
                     </p>
                   )}
                 </div>
 
+                {/* 选中产品库产品 → 预览 + 加入 */}
                 {pickedProduct && (
-                  <div className="rounded-xl border border-border bg-surface-hover p-3">
-                    <p className="mb-1.5 text-xs font-semibold text-foreground">核心成分</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {pickedProduct.keyIngredients.map((id) => (
-                        <span
-                          key={id}
-                          className="badge border border-primary/20 bg-primary/10 text-primary"
-                        >
-                          {nameOf(id)}
-                        </span>
-                      ))}
+                  <>
+                    <div className="rounded-xl border border-border bg-surface-hover p-3">
+                      <p className="mb-1.5 text-xs font-semibold text-foreground">核心成分</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {pickedProduct.keyIngredients.map((id) => (
+                          <span
+                            key={id}
+                            className="badge border border-primary/20 bg-primary/10 text-primary"
+                          >
+                            {nameOf(id)}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                    <button
+                      onClick={handleAddProduct}
+                      disabled={submitting}
+                      className="btn-primary w-full"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      加入我的护肤台
+                    </button>
+                  </>
                 )}
-
-                <button
-                  onClick={handleAddProduct}
-                  disabled={!pickedProduct || submitting}
-                  className="btn-primary w-full"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  加入我的护肤台
-                </button>
               </>
             )}
           </div>
