@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/copy-rdkit.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/copy-rdkit.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "copy:rdkit": "node scripts/copy-rdkit.mjs",
     "check:smiles": "node scripts/check-smiles.mjs"
   },
   "dependencies": {
+    "@rdkit/rdkit": "^2025.3.4-1.0.0",
     "@supabase/supabase-js": "^2.108.2",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.0",

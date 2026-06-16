@@ -3,24 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Atom, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Atom colors tuned for the light (#f5f5f7) surface so heteroatoms read clearly.
-const MOLECULE_THEME = {
-  FOREGROUND: '#1d1d1f',
-  BACKGROUND: '#f5f5f7',
-  C: '#1d1d1f', // carbon — near-black (skeletal lines)
-  N: '#2563eb', // blue-600
-  O: '#dc2626', // red-600
-  S: '#d97706', // amber-600
-  P: '#ea580c', // orange-600
-  SI: '#7c3aed', // violet-600 — silicones are everywhere in cosmetics
-  F: '#059669', // emerald-600
-  CL: '#0d9488', // teal-600
-  BR: '#ea580c',
-  I: '#9333ea', // purple-600
-  B: '#d97706',
-  H: '#9ca3af', // gray-400
-};
+import { StructureRender, THUMB_THEME, type StructureState } from '@/components/molecule-render';
 
 interface MoleculeViewerProps {
   smiles?: string;
@@ -28,69 +11,24 @@ interface MoleculeViewerProps {
   name: string;
 }
 
-type Status = 'loading' | 'done' | 'error' | 'empty';
-
 /**
- * Renders a 2D molecular structure from a SMILES string entirely in the browser
- * (via smiles-drawer). Gracefully degrades when the SMILES is missing
- * (mixtures/extracts) or cannot be parsed.
+ * Renders a 2D molecular structure for the detail view. Tries RDKit.js for a
+ * publication-grade SVG and falls back to smiles-drawer (both via
+ * StructureRender). Gracefully degrades when the SMILES is missing
+ * (mixtures/extracts) or cannot be parsed by either engine.
  */
 export function MoleculeViewer({ smiles, name }: MoleculeViewerProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [status, setStatus] = useState<Status>('loading');
-
-  useEffect(() => {
-    const trimmed = (smiles ?? '').trim();
-    if (!trimmed) {
-      setStatus('empty');
-      return;
-    }
-
-    let cancelled = false;
-    setStatus('loading');
-
-    (async () => {
-      try {
-        const SmilesDrawer = (await import('smiles-drawer')).default;
-        const svg = svgRef.current;
-        if (cancelled || !svg) return;
-
-        const drawer = new SmilesDrawer.SmiDrawer({
-          padding: 24,
-          themes: { skininsight: MOLECULE_THEME },
-        });
-
-        drawer.draw(
-          trimmed,
-          svg,
-          'skininsight',
-          () => {
-            if (!cancelled) setStatus('done');
-          },
-          () => {
-            if (!cancelled) setStatus('error');
-          },
-        );
-      } catch {
-        if (!cancelled) setStatus('error');
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [smiles]);
+  const [status, setStatus] = useState<StructureState>('loading');
 
   return (
     <div className="relative w-full h-56 sm:h-64 bg-surface-hover rounded-xl border border-border overflow-hidden flex items-center justify-center">
-      {/* Kept mounted so the ref exists at draw time; faded in once drawn. */}
-      <svg
-        ref={svgRef}
-        role="img"
-        aria-label={`${name} 化学结构图`}
-        className={`w-full h-full transition-opacity duration-500 ${
-          status === 'done' ? 'opacity-100' : 'opacity-0'
-        }`}
+      <StructureRender
+        smiles={smiles}
+        ariaLabel={`${name} 化学结构图`}
+        width={480}
+        height={250}
+        fallbackPadding={24}
+        onState={setStatus}
       />
 
       {status === 'loading' && (
@@ -119,22 +57,14 @@ export function MoleculeViewer({ smiles, name }: MoleculeViewerProps) {
   );
 }
 
-// Same atom palette, but a transparent canvas so the structure sits directly
-// on the card (the design draws the thumbnail with no background block).
-const THUMB_THEME = { ...MOLECULE_THEME, BACKGROUND: 'transparent' };
-
 /**
  * Compact 2D structure thumbnail for list cards — drawn directly on the card
- * surface (no background block, matching the design). Renders nothing when
- * there is no parsable SMILES (mixtures/extracts) so cards stay clean.
+ * surface (no background block, matching the design). Stays on smiles-drawer
+ * (lightweight) so scrolling the ~90-card grid never pulls RDKit's ~7MB WASM;
+ * the detail view is where RDKit's crisper rendering matters. Renders nothing
+ * when there is no parsable SMILES (mixtures/extracts) so cards stay clean.
  */
-export function MoleculeThumb({
-  smiles,
-  className,
-}: {
-  smiles?: string;
-  className?: string;
-}) {
+export function MoleculeThumb({ smiles, className }: { smiles?: string; className?: string }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [done, setDone] = useState(false);
   const trimmed = (smiles ?? '').trim();

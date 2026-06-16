@@ -11,5 +11,9 @@ yarn-error.log*
 next-env.d.ts
 .vercel
 
+# RDKit MinimalLib assets — copied from node_modules by scripts/copy-rdkit.mjs
+# (predev/prebuild). ~7MB; regenerated on install/build, not committed.
+public/rdkit/
+
 # Claude Code local machine config (keep launch.json shared)
 .claude/settings.local.json

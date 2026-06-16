@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert, X, Atom } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSafetyLevel, getIrritationConfig, getPregnancyConfig } from '@/lib/safety';
-import { isInorganic, INORGANIC_FORMULA } from '@/lib/categories';
+import { getStructureKind, INORGANIC_FORMULA } from '@/lib/categories';
 import { MoleculeViewer } from '@/components/molecule-viewer';
+import { PolymerStructure } from '@/components/polymer-structure';
 import { DataSource } from '@/components/data-source';
 import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 import type { Ingredient } from '@/lib/mock-data';
@@ -33,6 +34,7 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
   const SafetyIcon = SAFETY_ICON[safety.level];
   const irritation = getIrritationConfig(ingredient.irritationRisk);
   const pregnancy = getPregnancyConfig(ingredient.pregnantSafe);
+  const structureKind = getStructureKind(ingredient.id);
 
   return (
     <AnimatePresence>
@@ -120,7 +122,7 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
                 <Atom className="w-4 h-4 text-accent" />
                 化学结构
               </h4>
-              {isInorganic(ingredient.id) ? (
+              {structureKind === 'inorganic' ? (
                 /* 无机/晶体：不画分子骨架（会误导），改展示规范下标化学式 + 标注 */
                 <div className="flex h-40 w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-surface-hover px-6 text-center">
                   <span className="font-mono text-3xl font-semibold tracking-tight text-foreground">
@@ -133,6 +135,10 @@ export function IngredientDetail({ ingredient, onClose }: IngredientDetailProps)
                     该成分为无机晶体（矿物），以晶格 / 晶胞形式存在，没有单一有机分子结构，故不展示分子骨架图。
                   </p>
                 </div>
+              ) : structureKind === 'polymer' ? (
+                /* 聚合物：展示重复单元 + [ ]ₙ（或线式记号），不画误导性的固定长度链；
+                   故意不展示存储的原始 SMILES（那正是我们要隐藏的「假链」）。 */
+                <PolymerStructure id={ingredient.id} name={ingredient.nameCn} />
               ) : (
                 <>
                   <MoleculeViewer smiles={ingredient.smiles} name={ingredient.nameCn} />

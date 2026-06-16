@@ -4,8 +4,9 @@ import { motion } from 'framer-motion';
 import { Shield, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getSafetyLevel } from '@/lib/safety';
-import { isInorganic } from '@/lib/categories';
+import { getStructureKind } from '@/lib/categories';
 import { MoleculeThumb } from '@/components/molecule-viewer';
+import { PolymerThumb } from '@/components/polymer-structure';
 import type { Ingredient } from '@/lib/mock-data';
 
 interface IngredientCardProps {
@@ -29,6 +30,7 @@ function SafetyBadge({ score }: { score: number }) {
 }
 
 export function IngredientCard({ ingredient, index = 0, onClick }: IngredientCardProps) {
+  const structureKind = getStructureKind(ingredient.id);
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -38,11 +40,16 @@ export function IngredientCard({ ingredient, index = 0, onClick }: IngredientCar
       onClick={onClick}
       className="card group h-full cursor-pointer p-3.5"
     >
-      {/* Live-rendered 2D structure, floated so the title wraps around it.
-          无机/晶体成分不画（避免误导性的「假分子」缩略图）。 */}
-      {ingredient.smiles?.trim() && !isInorganic(ingredient.id) && (
+      {/* Floated so the title wraps around it. 分子画 2D 缩略图；聚合物给「[ ]ₙ」
+          标记；无机/晶体不画（避免误导性的「假分子」缩略图）。 */}
+      {structureKind === 'molecule' && ingredient.smiles?.trim() && (
         <span className="float-right ml-2.5 mb-0.5">
           <MoleculeThumb smiles={ingredient.smiles} />
+        </span>
+      )}
+      {structureKind === 'polymer' && (
+        <span className="float-right ml-2.5 mb-0.5">
+          <PolymerThumb id={ingredient.id} />
         </span>
       )}
 
