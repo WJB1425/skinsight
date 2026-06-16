@@ -90,6 +90,7 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiNote, setAiNote] = useState(false);
+  const [aiResolved, setAiResolved] = useState('');
   const [visionLoading, setVisionLoading] = useState(false);
   const [visionError, setVisionError] = useState<string | null>(null);
 
@@ -115,6 +116,7 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
       }
       setText(data.ingredientsText);
       setScanName(data.product || scanName);
+      setAiResolved([data.brand, data.product].filter(Boolean).join(' '));
       setThumbnail(preview);
       setAiNote(true);
       setTab('scan');
@@ -148,6 +150,7 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
       // 把 AI 结果灌入「拍成分表」流程，供核对 / 编辑后再添加
       setText(data.ingredientsText);
       setScanName(data.product || name);
+      setAiResolved([data.brand, data.product].filter(Boolean).join(' '));
       setAiNote(true);
       setTab('scan');
     } catch {
@@ -264,6 +267,11 @@ export function AddProductModal({ onAdd, onClose }: AddProductModalProps) {
                   <div className="flex items-start gap-2 rounded-xl border border-violet-200/80 bg-violet-50 px-3.5 py-2.5 text-xs text-violet-800">
                     <Sparkles className="mt-px h-3.5 w-3.5 shrink-0" />
                     <span>
+                      {aiResolved && (
+                        <>
+                          识别为「<strong>{aiResolved}</strong>」。{' '}
+                        </>
+                      )}
                       以下成分由 <strong>AI 识别 / 整理</strong>，仅供参考——请核对 / 编辑后再添加，以实物成分表为准。
                     </span>
                   </div>
